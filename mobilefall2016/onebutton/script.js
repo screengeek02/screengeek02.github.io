@@ -12,7 +12,7 @@ btn.addEventListener("mouseover", eventCallback);*/
 function main(){
     $('.msg').hide();
     $('.btn').on('click', function(){
-        
+        $('msg').toggle();
     });
 }
 
