@@ -1,4 +1,4 @@
-var btn = document.getElementById("btn");
+/*var btn = document.getElementById("btn");
 var msg = document.getElementById("msg");
 
 function eventCallback(e){
@@ -8,9 +8,12 @@ function eventCallback(e){
 btn.addEventListener("mousedown", eventCallback);
 btn.addEventListener("mouseup", eventCallback);
 btn.addEventListener("mouseout", eventCallback);
-btn.addEventListener("mouseover", eventCallback);
-/*function main(){
-    
-    
+btn.addEventListener("mouseover", eventCallback);*/
+function main(){
+    $('.msg').hide();
+    $('.btn').on('click', function(){
+        
+    });
 }
-$(document).ready(main);*/
+
+$(document).ready(main);
