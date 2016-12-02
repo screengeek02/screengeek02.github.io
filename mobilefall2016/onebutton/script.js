@@ -1,13 +1,11 @@
 var btn = document.getElementById("btn");
 var msg = document.getElementById("msg");
-
-btn.addEventListener("mousedown", eventCallback);
+var events = ["mousedown","mouseup","mouseout","mouseover"];
+/*btn.addEventListener("mousedown", eventCallback);
 btn.addEventListener("mouseup", eventCallback);
 btn.addEventListener("mouseout", eventCallback);
-btn.addEventListener("mouseover", eventCallback);
+btn.addEventListener("mouseover", eventCallback);*/
  
-
-function eventCallback(e){
-    msg.innerHTML = e.type;
+function handler(events){
+    msg.innerHTML = events.type;
 }
-
