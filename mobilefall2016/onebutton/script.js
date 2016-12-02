@@ -6,6 +6,7 @@ btn.addEventListener("mouseup", eventCallback);
 btn.addEventListener("mouseout", eventCallback);
 btn.addEventListener("mouseover", eventCallback);*/
  
-function handler(events){
+function handler(event){
+    if(event.target === btn);
     btn.innerHTML = events.type;
 }
