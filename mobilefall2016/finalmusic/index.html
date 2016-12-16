@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width
+			initial-scale=1
+			minimum-scale=1
+			maximum-scale=1
+			user-scalable=no">
+		<title>Quick Music</title>
+		<link rel="stylesheet" href="normalize.css">        
+		<link rel="stylesheet" href="style.css">
+        <script src="prefixfree.js"></script>        
+		<script src="songs.js"></script>
+	</head>
+	<body>
+		<div id="holder">
+			<div id="app">
+                <div id="controlsFrame">
+                    <div id="controls">
+                        <br>
+                        <div><audio id="player" controls></audio></div>
+                        <div>
+                            <select id="choices">
+                                <option>Select A Song</option>
+                                <option>Do You Mind</option>
+                                <option>Mona Lisas</option>
+                                <option>Faithfully</option>					
+                            </select>
+                        </div>
+                        <div id="songTitle"></div>
+                    </div><!-- END of controls -->                
+                </div><!-- END of controlsFrame -->  
+				<div id="pictureFrame"></div>			
+			</div><!-- END of app -->
+		</div><!-- END of holder -->
+	<script>
+		//just testing:
+		//alert(songs[3].song);
+		//alert(songs[3].picture);
+	</script>
+	<script src="script.js"></script>
+	</body>
+</html>
