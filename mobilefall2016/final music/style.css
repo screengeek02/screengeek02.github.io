@@ -1,0 +1,86 @@
+
+#app{
+ background: gray;
+ text-align: center;
+ position: fixed;
+ width: 50%;
+ height: 97%;
+ border-radius: 0.5rem;
+ border: 1px solid black;
+ margin: auto;
+  top:0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  margin: auto;
+  overflow: hidden;
+}
+
+.box{
+  border-radius: 1rem;
+  border: 1px solid black;
+}
+
+.vertical{
+  height: 49%;
+  width: 99%;
+}
+
+.horizontal{
+  display: inline-block;
+  height: 99%;
+  width: 49%;
+}
+#pictureFrame{
+	position: absolute;
+	bottom: 0.5%;
+	left: 0;
+	right: 0;
+	margin: auto;	
+	height: 74%;
+	width: 95%;	
+	border: 1px solid gray;
+	border-radius: 0.5rem;
+	background-color: black;
+}
+#controlsFrame{
+    position: absolute;
+    height: 23%;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    //border: 5px solid white;
+}
+#controls{
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+    bottom: 0;
+	margin: auto;	
+	height: 100%;
+	width: 95%;	
+	border: 1px solid gray;
+	border-radius: 0.5rem;
+	background-color: black;
+    overflow-y: hidden;
+}
+#songTitle{
+	color: white;
+    height: 3%;
+    padding: 0.5%;
+    font-size: 1.15rem;     
+}
+#player{
+    display: inline-block;
+    width: 90%;
+    font-size: 0.15rem;
+}
+
+#choices{
+    padding: 0.5%;    
+    font-size: 1.15rem;     
+}
+
+
