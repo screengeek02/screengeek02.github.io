@@ -1,8 +1,15 @@
+function id(idString){
+	return document.getElementById(idString);
+}
 var divs = document.getElementsByTagName('div');
 var boxes = document.getElementsByClassName('box');
 var app = divs[0];
 var controls = divs[1];
 var picture = divs[2];
+var choices = id("choices");
+var pictureFrame = id("picture");
+var songTitle = id("songTitle");
+
 
 // have window object handle resize event and load event
 window.addEventListener("load", flipFlop);
@@ -40,15 +47,6 @@ function flipFlop(evtObj){
   }
 }
 
-function id(idString){
-	return document.getElementById(idString);
-}
-// Gather all the elements
-var choices = id("choices");
-var pictureFrame = id("pictureFrame");
-var songTitle = id("songTitle");
-
-//listen for a change event in the choices element
 choices.addEventListener("change", playNewSong);
 window.addEventListener("load", function(e){
     adjustRem();
@@ -56,8 +54,6 @@ window.addEventListener("load", function(e){
     songTitle.innerHTML = "";
 });
 window.addEventListener("resize", adjustRem);
-
-//event handler functions below
 function adjustRem(e){
     document.documentElement.style.fontSize = (window.innerWidth / 50) + "px";
 }
@@ -92,7 +88,6 @@ function playNewSong(){
 		player.play();
 	}
 }
-
 
 
 
