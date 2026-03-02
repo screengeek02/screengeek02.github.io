@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { LogoutButton } from '@/components/logout-button';
+import { getSessionFromCookie } from '@/lib/auth';
 
-export default function PublicLayout({ children }: { children: React.ReactNode }) {
+export default async function PublicLayout({ children }: { children: React.ReactNode }) {
+  const session = getSessionFromCookie();
+  const dashboardHref = session?.role === 'ADMIN' ? '/admin/dashboard' : '/worker/dashboard';
+
   return (
     <div className="min-h-screen bg-slate-50">
       <header className="border-b border-slate-200 bg-white">
@@ -8,9 +13,27 @@ export default function PublicLayout({ children }: { children: React.ReactNode }
           <Link href="/book" className="text-base font-semibold tracking-tight text-slate-800">
             Helio Service Scheduler
           </Link>
-          <Link href="/worker/jobs" className="text-sm font-medium text-slate-600 transition hover:text-slate-900">
-            My Jobs
-          </Link>
+
+          <div className="flex items-center gap-2">
+            {!session ? (
+              <Link
+                href="/login"
+                className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+              >
+                Login
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href={dashboardHref}
+                  className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                >
+                  Dashboard
+                </Link>
+                <LogoutButton className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900" />
+              </>
+            )}
+          </div>
         </nav>
       </header>
       <main className="mx-auto w-full max-w-5xl px-4 py-8">{children}</main>
