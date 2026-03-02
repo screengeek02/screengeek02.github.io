@@ -1,14 +1,27 @@
 import { JobStatus, Role } from '@prisma/client';
 import { SessionUser } from './auth';
 
+const cancellableStatuses: JobStatus[] = [
+  JobStatus.PENDING,
+  JobStatus.ASSIGNED,
+  JobStatus.IN_PROGRESS,
+];
+
+const assignableStatuses: JobStatus[] = [
+  JobStatus.PENDING,
+  JobStatus.ASSIGNED,
+];
+
 export function canTransitionStatus(current: JobStatus, next: JobStatus, actorRole: Role) {
   if (actorRole === Role.ADMIN) {
     if (next === JobStatus.CANCELLED) {
-      return [JobStatus.PENDING, JobStatus.ASSIGNED, JobStatus.IN_PROGRESS].includes(current);
+      return cancellableStatuses.includes(current);
     }
+
     if (next === JobStatus.ASSIGNED) {
-      return [JobStatus.PENDING, JobStatus.ASSIGNED].includes(current);
+      return assignableStatuses.includes(current);
     }
+
     return false;
   }
 
