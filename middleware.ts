@@ -1,26 +1,31 @@
 import { NextRequest, NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { jwtVerify } from 'jose';
 import { SESSION_COOKIE } from './lib/auth';
 
 type MiddlewareSession = {
   role: 'ADMIN' | 'WORKER';
 };
 
-function parseSession(request: NextRequest): MiddlewareSession | null {
+async function parseSession(request: NextRequest): Promise<MiddlewareSession | null> {
   const token = request.cookies.get(SESSION_COOKIE)?.value;
   const secret = process.env.AUTH_SECRET;
   if (!token || !secret) return null;
 
   try {
-    return jwt.verify(token, secret) as MiddlewareSession;
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    if (payload.role === 'ADMIN' || payload.role === 'WORKER') {
+      return { role: payload.role };
+    }
+
+    return null;
   } catch {
     return null;
   }
 }
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const session = parseSession(request);
+  const session = await parseSession(request);
 
   if (pathname.startsWith('/admin')) {
     if (!session) return NextResponse.redirect(new URL('/login', request.url));
@@ -42,5 +47,5 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/worker/:path*', '/login/:path*'],
+  matcher: ['/admin/:path*', '/worker/:path*', '/login', '/login/:path*'],
 };
