@@ -2,7 +2,7 @@
 
 import { JobStatus } from '@prisma/client';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { StatusBadge } from '@/components/status-badge';
 
 type Job = {
@@ -17,24 +17,28 @@ type Job = {
 
 type Worker = { id: string; name: string };
 
+const dispatchColumns: Array<{ title: string; status: JobStatus }> = [
+  { title: 'Pending', status: JobStatus.PENDING },
+  { title: 'Assigned', status: JobStatus.ASSIGNED },
+  { title: 'In Progress', status: JobStatus.IN_PROGRESS },
+  { title: 'Completed', status: JobStatus.COMPLETED },
+];
+
 export default function AdminDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
-  const [stats, setStats] = useState({ total: 0, pending: 0, assigned: 0, inProgress: 0, completed: 0 });
   const [status, setStatus] = useState('ALL');
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(true);
 
   async function loadData() {
     setLoading(true);
-    const [jobsRes, workerRes, statsRes] = await Promise.all([
+    const [jobsRes, workerRes] = await Promise.all([
       fetch(`/api/admin/jobs?status=${status}&date=${date}`),
       fetch('/api/admin/workers'),
-      fetch('/api/admin/stats'),
     ]);
     setJobs(await jobsRes.json());
     setWorkers(await workerRes.json());
-    setStats(await statsRes.json());
     setLoading(false);
   }
 
@@ -60,26 +64,18 @@ export default function AdminDashboard() {
     void loadData();
   }
 
+  const groupedJobs = useMemo(() => {
+    return dispatchColumns.map((column) => ({
+      ...column,
+      jobs: jobs.filter((job) => job.status === column.status),
+    }));
+  }, [jobs]);
+
   return (
     <section className="space-y-6">
-      <h1 className="text-2xl font-semibold text-slate-800">Admin Dashboard</h1>
-
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-5">
-        {Object.entries({
-          'Total Jobs': stats.total,
-          Pending: stats.pending,
-          Assigned: stats.assigned,
-          'In Progress': stats.inProgress,
-          Completed: stats.completed,
-        }).map(([label, value]) => (
-          <div
-            key={label}
-            className="rounded-xl border border-slate-200 bg-white px-5 py-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
-          >
-            <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
-            <p className="mt-3 text-4xl font-semibold leading-none text-slate-800">{value}</p>
-          </div>
-        ))}
+      <div>
+        <h1 className="text-2xl font-semibold text-slate-800">Dispatch Board</h1>
+        <p className="text-sm text-slate-500">Live view of cleaning jobs across Punta Cana and Bavaro.</p>
       </div>
 
       <div className="flex flex-wrap gap-2">
@@ -108,62 +104,63 @@ export default function AdminDashboard() {
       </div>
 
       {loading ? (
-        <p className="text-slate-500">Loading...</p>
+        <p className="text-slate-500">Loading dispatch board...</p>
       ) : (
-        <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-          <table className="min-w-full text-left text-sm">
-            <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-600">
-              <tr>
-                <th className="px-4 py-3">Scheduled</th>
-                <th className="px-4 py-3">Customer</th>
-                <th className="px-4 py-3">Service</th>
-                <th className="px-4 py-3">Address</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Worker</th>
-                <th className="px-4 py-3">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {jobs.map((job) => (
-                <tr key={job.id} className="border-t border-slate-100 transition hover:bg-slate-50/80">
-                  <td className="px-4 py-4 text-slate-700">{new Date(job.scheduledDate).toLocaleString()}</td>
-                  <td className="px-4 py-4 font-medium text-slate-800">{job.customerName}</td>
-                  <td className="px-4 py-4 text-slate-600">{job.serviceType}</td>
-                  <td className="px-4 py-4 text-slate-600">{job.address.slice(0, 30)}</td>
-                  <td className="px-4 py-4">
-                    <StatusBadge status={job.status} />
-                  </td>
-                  <td className="px-4 py-4 text-slate-600">{job.assignedWorker?.name ?? 'Unassigned'}</td>
-                  <td className="space-y-2 px-4 py-4">
-                    <select
-                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
-                      onChange={(e) => e.target.value && assign(job.id, e.target.value)}
-                      defaultValue=""
-                    >
-                      <option value="">Assign worker</option>
-                      {workers.map((worker) => (
-                        <option key={worker.id} value={worker.id}>
-                          {worker.name}
-                        </option>
-                      ))}
-                    </select>
-                    <select
-                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
-                      onChange={(e) => e.target.value && changeStatus(job.id, e.target.value as JobStatus)}
-                      defaultValue=""
-                    >
-                      <option value="">Update status</option>
-                      <option value={JobStatus.ASSIGNED}>ASSIGNED</option>
-                      <option value={JobStatus.CANCELLED}>CANCELLED</option>
-                    </select>
-                    <Link className="text-sm font-medium text-slate-700 hover:text-slate-900" href={`/admin/jobs/${job.id}`}>
-                      View details
-                    </Link>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+        <div className="grid gap-4 lg:grid-cols-4">
+          {groupedJobs.map((column) => (
+            <article key={column.status} className="rounded-xl border border-slate-200 bg-white shadow-sm">
+              <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
+                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">{column.title}</h2>
+                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{column.jobs.length}</span>
+              </header>
+
+              <div className="space-y-3 p-3">
+                {column.jobs.length === 0 && <p className="text-sm text-slate-400">No jobs in this lane.</p>}
+
+                {column.jobs.map((job) => (
+                  <div key={job.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm transition hover:bg-white">
+                    <div className="mb-2 flex items-start justify-between gap-2">
+                      <h3 className="font-semibold text-slate-800">{job.customerName}</h3>
+                      <StatusBadge status={job.status} />
+                    </div>
+                    <p className="text-sm text-slate-600">{job.serviceType}</p>
+                    <p className="text-sm text-slate-500">{new Date(job.scheduledDate).toLocaleString()}</p>
+                    <p className="text-sm text-slate-500">{job.assignedWorker?.name ?? 'Unassigned'}</p>
+
+                    <div className="mt-3 space-y-2">
+                      {job.status !== JobStatus.COMPLETED && (
+                        <select
+                          className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
+                          onChange={(e) => e.target.value && assign(job.id, e.target.value)}
+                          defaultValue=""
+                        >
+                          <option value="">Assign worker</option>
+                          {workers.map((worker) => (
+                            <option key={worker.id} value={worker.id}>
+                              {worker.name}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {(job.status === JobStatus.PENDING || job.status === JobStatus.ASSIGNED || job.status === JobStatus.IN_PROGRESS) && (
+                        <button
+                          onClick={() => changeStatus(job.id, JobStatus.CANCELLED)}
+                          className="w-full rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
+                        >
+                          Cancel Job
+                        </button>
+                      )}
+
+                      <Link className="inline-block text-sm font-medium text-slate-700 hover:text-slate-900" href={`/admin/jobs/${job.id}`}>
+                        View details
+                      </Link>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </article>
+          ))}
         </div>
       )}
     </section>
