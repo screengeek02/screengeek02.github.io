@@ -44,5 +44,5 @@ export function getSessionFromCookie(): SessionUser | null {
   }
 }
 
-export { SESSION_COOKIE };
+export { SESSION_COOKIE, SESSION_TTL_SECONDS };
 export type { SessionUser };

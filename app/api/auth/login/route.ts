@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { createSessionToken, setSessionCookie } from '@/lib/auth';
+import { createSessionToken, SESSION_COOKIE, SESSION_TTL_SECONDS } from '@/lib/auth';
 import { loginSchema } from '@/lib/validations';
 
 export async function POST(request: Request) {
@@ -19,9 +19,17 @@ export async function POST(request: Request) {
     if (!valid) return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
 
     const token = createSessionToken({ userId: user.id, role: user.role, email: user.email, name: user.name });
-    setSessionCookie(token);
 
-    return NextResponse.json({ role: user.role });
+    const response = NextResponse.json({ role: user.role });
+    response.cookies.set(SESSION_COOKIE, token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: SESSION_TTL_SECONDS,
+    });
+
+    return response;
   } catch {
     return NextResponse.json({ error: 'Unable to login at this time.' }, { status: 500 });
   }

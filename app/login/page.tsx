@@ -28,8 +28,7 @@ export default function LoginPage() {
       return;
     }
 
-    router.push(json.role === 'ADMIN' ? '/admin/dashboard' : '/worker/dashboard');
-    router.refresh();
+    router.replace(json.role === 'ADMIN' ? '/admin/dashboard' : '/worker/dashboard');
   }
 
   return (
