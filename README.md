@@ -117,7 +117,7 @@ In **Websites & Domains → app.heliocleaning.com → Node.js**:
 
 Use **Custom environment variables** and add:
 
-- `DATABASE_URL=postgresql://...`
+- `DATABASE_URL=mysql://USER:PASSWORD@localhost:3306/helio_scheduler`
 - `AUTH_SECRET=<long-random-secret>`
 - `NEXT_PUBLIC_APP_URL=https://app.heliocleaning.com`
 - `NODE_ENV=production`
