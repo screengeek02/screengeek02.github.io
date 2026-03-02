@@ -72,16 +72,19 @@ export default function AdminDashboard() {
           'In Progress': stats.inProgress,
           Completed: stats.completed,
         }).map(([label, value]) => (
-          <div key={label} className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+          <div
+            key={label}
+            className="rounded-xl border border-slate-200 bg-white px-5 py-6 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+          >
             <p className="text-xs uppercase tracking-wide text-slate-400">{label}</p>
-            <p className="mt-2 text-3xl font-semibold text-slate-800">{value}</p>
+            <p className="mt-3 text-4xl font-semibold leading-none text-slate-800">{value}</p>
           </div>
         ))}
       </div>
 
       <div className="flex flex-wrap gap-2">
         <select
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -93,7 +96,7 @@ export default function AdminDashboard() {
           ))}
         </select>
         <select
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700"
+          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         >
@@ -111,29 +114,29 @@ export default function AdminDashboard() {
           <table className="min-w-full text-left text-sm">
             <thead className="bg-slate-100 text-xs uppercase tracking-wide text-slate-600">
               <tr>
-                <th className="p-3">Scheduled</th>
-                <th className="p-3">Customer</th>
-                <th className="p-3">Service</th>
-                <th className="p-3">Address</th>
-                <th className="p-3">Status</th>
-                <th className="p-3">Worker</th>
-                <th className="p-3">Actions</th>
+                <th className="px-4 py-3">Scheduled</th>
+                <th className="px-4 py-3">Customer</th>
+                <th className="px-4 py-3">Service</th>
+                <th className="px-4 py-3">Address</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Worker</th>
+                <th className="px-4 py-3">Actions</th>
               </tr>
             </thead>
             <tbody>
               {jobs.map((job) => (
-                <tr key={job.id} className="border-t transition hover:bg-slate-50">
-                  <td className="p-3 text-slate-700">{new Date(job.scheduledDate).toLocaleString()}</td>
-                  <td className="p-3 text-slate-800">{job.customerName}</td>
-                  <td className="p-3 text-slate-600">{job.serviceType}</td>
-                  <td className="p-3 text-slate-600">{job.address.slice(0, 30)}</td>
-                  <td className="p-3">
+                <tr key={job.id} className="border-t border-slate-100 transition hover:bg-slate-50/80">
+                  <td className="px-4 py-4 text-slate-700">{new Date(job.scheduledDate).toLocaleString()}</td>
+                  <td className="px-4 py-4 font-medium text-slate-800">{job.customerName}</td>
+                  <td className="px-4 py-4 text-slate-600">{job.serviceType}</td>
+                  <td className="px-4 py-4 text-slate-600">{job.address.slice(0, 30)}</td>
+                  <td className="px-4 py-4">
                     <StatusBadge status={job.status} />
                   </td>
-                  <td className="p-3 text-slate-600">{job.assignedWorker?.name ?? 'Unassigned'}</td>
-                  <td className="space-y-2 p-3">
+                  <td className="px-4 py-4 text-slate-600">{job.assignedWorker?.name ?? 'Unassigned'}</td>
+                  <td className="space-y-2 px-4 py-4">
                     <select
-                      className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
                       onChange={(e) => e.target.value && assign(job.id, e.target.value)}
                       defaultValue=""
                     >
@@ -145,7 +148,7 @@ export default function AdminDashboard() {
                       ))}
                     </select>
                     <select
-                      className="w-full rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-sm text-slate-700"
+                      className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
                       onChange={(e) => e.target.value && changeStatus(job.id, e.target.value as JobStatus)}
                       defaultValue=""
                     >
