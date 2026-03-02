@@ -42,6 +42,7 @@ Production-ready MVP for app.heliocleaning.com built with Next.js 14 + Prisma + 
 ├── prisma/
 │   ├── schema.prisma
 │   └── seed.ts
+├── app.js
 ├── middleware.ts
 ├── package.json
 └── .env.example
@@ -86,6 +87,59 @@ Includes:
    ```bash
    npm run dev
    ```
+
+## Deploying on Plesk VPS (Node.js Extension)
+
+The Plesk screenshot error (`startup file /httpdocs/app.js is not found`) is fixed by this repo including an `app.js` startup entrypoint.
+
+### 1) Server prerequisites
+
+- Node.js extension enabled in Plesk
+- PostgreSQL database created and accessible from your app domain user
+- Domain/subdomain created: `app.heliocleaning.com`
+
+### 2) Upload code to application root
+
+- Upload project files into your domain **Application Root** (example: `/httpdocs` or a separate folder like `/httpdocs/helio-service-scheduler`).
+- Ensure `package.json`, `.next` build output (after build), and `app.js` are inside the same root.
+
+### 3) Configure Node.js settings in Plesk
+
+In **Websites & Domains → app.heliocleaning.com → Node.js**:
+
+- **Application mode**: `production`
+- **Application root**: your project folder (example `/httpdocs`)
+- **Document root**: `public` (recommended by Plesk) or leave as configured by your hosting policy
+- **Application startup file**: `app.js`
+- **Package manager**: `npm`
+
+### 4) Add environment variables in Plesk UI
+
+Use **Custom environment variables** and add:
+
+- `DATABASE_URL=postgresql://...`
+- `AUTH_SECRET=<long-random-secret>`
+- `NEXT_PUBLIC_APP_URL=https://app.heliocleaning.com`
+- `NODE_ENV=production`
+
+### 5) Install/build/start from Plesk
+
+Use buttons in Node.js page (**NPM install**, **Run script**) in this order:
+
+1. `npm install`
+2. `npm run build`
+3. `npm run db:migrate`
+4. `npm run db:seed` (first deployment only, or when you want demo data)
+5. Click **Restart App**
+
+Plesk will run `app.js`, which serves the compiled Next.js app.
+
+### 6) Common Plesk troubleshooting
+
+- **“app.js not found”**: ensure startup file is exactly `app.js` and exists in Application Root.
+- **Blank page / 500**: check Node.js logs in Plesk and verify `npm run build` completed.
+- **Database errors**: confirm `DATABASE_URL` credentials, host/IP allowlist, and SSL requirements.
+- **Wrong URL redirects**: verify `NEXT_PUBLIC_APP_URL` is `https://app.heliocleaning.com`.
 
 ## Demo Seed Credentials
 
