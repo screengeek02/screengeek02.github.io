@@ -1,6 +1,7 @@
 import './globals.css';
 import Link from 'next/link';
 import { getSessionFromCookie } from '@/lib/auth';
+import { LogoutButton } from '@/components/logout-button';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const session = getSessionFromCookie();
@@ -20,11 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               )}
               {session?.role === 'ADMIN' && <Link href="/admin/dashboard" className="hover:text-blue-600">Dashboard</Link>}
               {session?.role === 'WORKER' && <Link href="/worker/dashboard" className="hover:text-blue-600">My Jobs</Link>}
-              {session && (
-                <form action="/api/auth/logout" method="post">
-                  <button className="rounded bg-slate-800 px-3 py-1.5 text-white">Logout</button>
-                </form>
-              )}
+              {session && <LogoutButton />}
             </div>
           </nav>
         </header>

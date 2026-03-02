@@ -1,7 +1,12 @@
 import { NextResponse } from 'next/server';
-import { clearSessionCookie } from '@/lib/auth';
+import { SESSION_COOKIE } from '@/lib/auth';
 
-export async function POST() {
-  clearSessionCookie();
-  return NextResponse.redirect(new URL('/login', process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'));
+export async function POST(request: Request) {
+  const response = NextResponse.redirect(new URL('/login', request.url));
+  response.cookies.set(SESSION_COOKIE, '', {
+    maxAge: 0,
+    path: '/',
+  });
+
+  return response;
 }
