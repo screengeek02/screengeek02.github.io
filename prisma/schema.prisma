@@ -1,0 +1,69 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  WORKER
+}
+
+enum JobStatus {
+  PENDING
+  ASSIGNED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceType {
+  STANDARD
+  DEEP
+  MOVE_OUT
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  assignedJobs Job[]    @relation("AssignedWorkerJobs")
+}
+
+model Job {
+  id               String      @id @default(cuid())
+  customerName     String
+  customerPhone    String
+  customerEmail    String?
+  address          String
+  serviceType      ServiceType
+  scheduledDate    DateTime
+  status           JobStatus   @default(PENDING)
+  assignedWorkerId String?
+  assignedWorker   User?       @relation("AssignedWorkerJobs", fields: [assignedWorkerId], references: [id])
+  createdAt        DateTime    @default(now())
+  updatedAt        DateTime    @updatedAt
+
+  notes            JobNote[]
+
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model JobNote {
+  id        String   @id @default(cuid())
+  jobId     String
+  job       Job      @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([jobId])
+}
