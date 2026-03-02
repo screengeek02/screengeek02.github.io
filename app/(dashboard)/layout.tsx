@@ -1,20 +1,27 @@
 'use client';
 
 import Link from 'next/link';
+import type { Route } from 'next';
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import clsx from 'clsx';
 import { LogoutButton } from '@/components/logout-button';
 
+type NavItem = {
+  href: Route;
+  label: string;
+  active: boolean;
+};
+
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
 
-  const dashboardHref = isAdmin ? '/admin/dashboard' : '/worker/dashboard';
-  const jobsHref = isAdmin ? '/admin/jobs' : '/worker/jobs';
+  const dashboardHref: Route = isAdmin ? '/admin/dashboard' : '/worker/dashboard';
+  const jobsHref: Route = isAdmin ? '/admin/jobs' : '/worker/jobs';
   const panelTitle = isAdmin ? 'Admin Panel' : 'Worker Panel';
 
-  const navItems = [
+  const navItems: NavItem[] = [
     { label: 'Dashboard', href: dashboardHref, active: pathname.startsWith(dashboardHref) },
     { label: 'Jobs', href: jobsHref, active: pathname.startsWith(jobsHref) },
   ];
