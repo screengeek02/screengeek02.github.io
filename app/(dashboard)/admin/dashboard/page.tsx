@@ -1,8 +1,8 @@
 'use client';
 
 import { JobStatus } from '@prisma/client';
-import Link from 'next/link';
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DispatchMapMock } from '@/components/DispatchMapMock';
 import { StatusBadge } from '@/components/status-badge';
 
 type Job = {
@@ -17,11 +17,10 @@ type Job = {
 
 type Worker = { id: string; name: string };
 
-const dispatchColumns: Array<{ title: string; status: JobStatus }> = [
-  { title: 'Pending', status: JobStatus.PENDING },
-  { title: 'Assigned', status: JobStatus.ASSIGNED },
-  { title: 'In Progress', status: JobStatus.IN_PROGRESS },
-  { title: 'Completed', status: JobStatus.COMPLETED },
+const activityItems = [
+  { text: 'Antonio Martinez booking expired', time: '22 min ago' },
+  { text: 'New villa cleaning request from Emily Johnson', time: '56 min ago' },
+  { text: 'Marisol Herrera job completed successfully', time: '1h ago' },
 ];
 
 export default function AdminDashboard() {
@@ -31,7 +30,7 @@ export default function AdminDashboard() {
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(true);
 
-  async function loadData() {
+  const loadData = useCallback(async () => {
     setLoading(true);
     const [jobsRes, workerRes] = await Promise.all([
       fetch(`/api/admin/jobs?status=${status}&date=${date}`),
@@ -40,47 +39,76 @@ export default function AdminDashboard() {
     setJobs(await jobsRes.json());
     setWorkers(await workerRes.json());
     setLoading(false);
-  }
+  }, [status, date]);
 
   useEffect(() => {
     void loadData();
-  }, [status, date]);
+  }, [loadData]);
 
-  async function assign(jobId: string, workerId: string) {
-    await fetch(`/api/admin/jobs/${jobId}/assign`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ workerId }),
-    });
-    void loadData();
-  }
+  const changeStatus = useCallback(
+    async (jobId: string, nextStatus: JobStatus) => {
+      await fetch(`/api/admin/jobs/${jobId}/status`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      void loadData();
+    },
+    [loadData],
+  );
 
-  async function changeStatus(jobId: string, nextStatus: JobStatus) {
-    await fetch(`/api/admin/jobs/${jobId}/status`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: nextStatus }),
-    });
-    void loadData();
-  }
+  const assign = useCallback(
+    async (jobId: string, workerId: string) => {
+      await fetch(`/api/admin/jobs/${jobId}/assign`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ workerId }),
+      });
+      void loadData();
+    },
+    [loadData],
+  );
 
-  const groupedJobs = useMemo(() => {
-    return dispatchColumns.map((column) => ({
-      ...column,
-      jobs: jobs.filter((job) => job.status === column.status),
-    }));
+  const stats = useMemo(() => {
+    const today = new Date();
+    const todaysJobs = jobs.filter((job) => {
+      const d = new Date(job.scheduledDate);
+      return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+    }).length;
+    const activeCleaners = new Set(jobs.filter((j) => j.status === JobStatus.ASSIGNED || j.status === JobStatus.IN_PROGRESS).map((j) => j.assignedWorker?.id).filter(Boolean)).size;
+
+    return {
+      jobsToday: todaysJobs,
+      activeCleaners,
+      avgArrival: '32 min',
+    };
   }, [jobs]);
 
-  return (
-    <section className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-800">Dispatch Board</h1>
-        <p className="text-sm text-slate-500">Live view of cleaning jobs across Punta Cana and Bavaro.</p>
-      </div>
+  const upcomingJobs = useMemo(
+    () =>
+      jobs
+        .filter((job) => job.status !== JobStatus.COMPLETED && job.status !== JobStatus.CANCELLED)
+        .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime())
+        .slice(0, 4),
+    [jobs],
+  );
 
+  const cleanerAvailability = useMemo(() => {
+    return workers.slice(0, 5).map((worker) => {
+      const activeJob = jobs.find((job) => job.assignedWorker?.id === worker.id && job.status === JobStatus.IN_PROGRESS);
+      const assignedJob = jobs.find((job) => job.assignedWorker?.id === worker.id && job.status === JobStatus.ASSIGNED);
+
+      if (activeJob) return { ...worker, state: 'On Job' as const };
+      if (assignedJob) return { ...worker, state: 'Assigned' as const };
+      return { ...worker, state: 'Available' as const };
+    });
+  }, [workers, jobs]);
+
+  return (
+    <section className="space-y-5">
       <div className="flex flex-wrap gap-2">
         <select
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
+          className="rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-400/60"
           value={status}
           onChange={(e) => setStatus(e.target.value)}
         >
@@ -92,7 +120,7 @@ export default function AdminDashboard() {
           ))}
         </select>
         <select
-          className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
+          className="rounded-xl border border-slate-700 bg-slate-900/80 px-3 py-2 text-sm text-slate-100 outline-none focus:border-sky-400/60"
           value={date}
           onChange={(e) => setDate(e.target.value)}
         >
@@ -103,66 +131,156 @@ export default function AdminDashboard() {
         </select>
       </div>
 
-      {loading ? (
-        <p className="text-slate-500">Loading dispatch board...</p>
-      ) : (
-        <div className="grid gap-4 lg:grid-cols-4">
-          {groupedJobs.map((column) => (
-            <article key={column.status} className="rounded-xl border border-slate-200 bg-white shadow-sm">
-              <header className="flex items-center justify-between border-b border-slate-200 px-4 py-3">
-                <h2 className="text-sm font-semibold uppercase tracking-wide text-slate-700">{column.title}</h2>
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">{column.jobs.length}</span>
-              </header>
+      <div className="grid gap-3 md:grid-cols-3">
+        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Jobs Today</p>
+          <p className="mt-2 text-3xl font-semibold text-sky-300">{stats.jobsToday}</p>
+          <p className="text-xs text-slate-400">15% vs yesterday</p>
+        </article>
+        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Active Cleaners</p>
+          <p className="mt-2 text-3xl font-semibold text-emerald-300">{stats.activeCleaners}</p>
+          <p className="text-xs text-slate-400">Live on routes</p>
+        </article>
+        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
+          <p className="text-xs uppercase tracking-wide text-slate-400">Avg Arrival Time</p>
+          <p className="mt-2 text-3xl font-semibold text-cyan-300">{stats.avgArrival}</p>
+          <p className="text-xs text-slate-400">-7% from yesterday</p>
+        </article>
+      </div>
 
-              <div className="space-y-3 p-3">
-                {column.jobs.length === 0 && <p className="text-sm text-slate-400">No jobs in this lane.</p>}
+      <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
+        <h2 className="text-3xl font-semibold tracking-tight text-white">Live Dispatch in Punta Cana</h2>
+        <p className="mt-1 text-sm text-slate-400">See how Helio assigns and routes professional cleaners in real time.</p>
+        <div className="mt-4">
+          <DispatchMapMock />
+        </div>
+        <div className="mt-4 grid gap-2 rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-sm text-slate-300 md:grid-cols-3">
+          <p>
+            Completions today: <span className="font-semibold text-cyan-300">36</span>
+          </p>
+          <p>
+            Cleaners on duty: <span className="font-semibold text-cyan-300">{stats.activeCleaners}</span>
+          </p>
+          <p>
+            Arrival time: <span className="font-semibold text-cyan-300">32 min</span>
+          </p>
+        </div>
+      </article>
 
-                {column.jobs.map((job) => (
-                  <div key={job.id} className="rounded-lg border border-slate-200 bg-slate-50 p-3 shadow-sm transition hover:bg-white">
-                    <div className="mb-2 flex items-start justify-between gap-2">
-                      <h3 className="font-semibold text-slate-800">{job.customerName}</h3>
-                      <StatusBadge status={job.status} />
-                    </div>
-                    <p className="text-sm text-slate-600">{job.serviceType}</p>
-                    <p className="text-sm text-slate-500">{new Date(job.scheduledDate).toLocaleString()}</p>
-                    <p className="text-sm text-slate-500">{job.assignedWorker?.name ?? 'Unassigned'}</p>
+      <div className="grid gap-4 lg:grid-cols-2">
+        <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
+          <h3 className="text-2xl font-semibold text-white">Upcoming Jobs</h3>
+          <div className="mt-3 space-y-3">
+            {loading && <p className="text-sm text-slate-400">Loading jobs...</p>}
+            {!loading && upcomingJobs.length === 0 && <p className="text-sm text-slate-400">No upcoming jobs.</p>}
 
-                    <div className="mt-3 space-y-2">
-                      {job.status !== JobStatus.COMPLETED && (
-                        <select
-                          className="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-2 text-sm text-slate-700 shadow-sm outline-none transition focus:border-slate-500"
-                          onChange={(e) => e.target.value && assign(job.id, e.target.value)}
-                          defaultValue=""
-                        >
-                          <option value="">Assign worker</option>
-                          {workers.map((worker) => (
-                            <option key={worker.id} value={worker.id}>
-                              {worker.name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-
-                      {(job.status === JobStatus.PENDING || job.status === JobStatus.ASSIGNED || job.status === JobStatus.IN_PROGRESS) && (
-                        <button
-                          onClick={() => changeStatus(job.id, JobStatus.CANCELLED)}
-                          className="w-full rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-700 transition hover:bg-rose-100"
-                        >
-                          Cancel Job
-                        </button>
-                      )}
-
-                      <Link className="inline-block text-sm font-medium text-slate-700 hover:text-slate-900" href={`/admin/jobs/${job.id}`}>
-                        View details
-                      </Link>
+            {upcomingJobs.map((job) => (
+              <div key={job.id} className="rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <div className="h-9 w-9 rounded-full bg-slate-700" />
+                    <div>
+                      <p className="font-semibold text-slate-100">{job.customerName}</p>
+                      <p className="text-sm text-slate-400">{job.serviceType}</p>
                     </div>
                   </div>
-                ))}
+                  <StatusBadge status={job.status} />
+                </div>
+                <p className="mt-2 text-sm text-slate-400">{new Date(job.scheduledDate).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</p>
+                <div className="mt-2 grid gap-2 md:grid-cols-2">
+                  <select
+                    className="rounded-lg border border-slate-700 bg-slate-900 px-2 py-1.5 text-sm text-slate-200"
+                    onChange={(e) => e.target.value && assign(job.id, e.target.value)}
+                    defaultValue=""
+                  >
+                    <option value="">Assign worker</option>
+                    {workers.map((worker) => (
+                      <option key={worker.id} value={worker.id}>
+                        {worker.name}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    onClick={() => changeStatus(job.id, JobStatus.CANCELLED)}
+                    className="rounded-lg border border-rose-400/40 bg-rose-500/10 px-2 py-1.5 text-sm font-medium text-rose-200 transition hover:bg-rose-500/20"
+                  >
+                    Cancel Job
+                  </button>
+                </div>
               </div>
-            </article>
+            ))}
+          </div>
+        </article>
+
+        <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
+          <h3 className="text-2xl font-semibold text-white">Cleaner Availability</h3>
+          <div className="mt-3 space-y-3">
+            {cleanerAvailability.map((worker) => (
+              <div key={worker.id} className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+                <div className="flex items-center gap-3">
+                  <div className="h-9 w-9 rounded-full bg-slate-700" />
+                  <p className="font-medium text-slate-100">{worker.name}</p>
+                </div>
+                <span
+                  className={`rounded-full px-3 py-1 text-xs font-medium ${
+                    worker.state === 'Available'
+                      ? 'bg-emerald-500/15 text-emerald-300'
+                      : worker.state === 'On Job'
+                        ? 'bg-amber-500/15 text-amber-300'
+                        : 'bg-sky-500/15 text-sky-300'
+                  }`}
+                >
+                  {worker.state}
+                </span>
+              </div>
+            ))}
+          </div>
+        </article>
+      </div>
+
+      <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-2xl font-semibold text-white">Jobs Overview</h3>
+          <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-1 text-xs">
+            <span className="rounded-md bg-slate-800 px-2 py-1 text-slate-200">Week</span>
+            <span className="px-2 py-1 text-slate-400">Month</span>
+          </div>
+        </div>
+
+        <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-3">
+          <svg viewBox="0 0 500 180" className="h-52 w-full">
+            <defs>
+              <linearGradient id="helioLine" x1="0" x2="1" y1="0" y2="0">
+                <stop offset="0%" stopColor="#22d3ee" />
+                <stop offset="100%" stopColor="#38bdf8" />
+              </linearGradient>
+            </defs>
+            <path d="M20 150 C 80 90, 120 120, 170 86 S 280 120, 330 92 S 430 42, 480 30" fill="none" stroke="url(#helioLine)" strokeWidth="4" className="helio-chart-line" />
+            {[20, 90, 160, 230, 300, 370, 440].map((x) => (
+              <line key={x} x1={x} y1={15} x2={x} y2={160} stroke="rgba(148,163,184,0.2)" strokeDasharray="3 6" />
+            ))}
+          </svg>
+        </div>
+      </article>
+
+      <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
+        <div className="mb-3 flex items-center justify-between">
+          <h3 className="text-2xl font-semibold text-white">Recent Activity</h3>
+          <button className="rounded-lg border border-slate-700 px-3 py-1 text-sm text-slate-300 transition hover:border-sky-400/40 hover:text-sky-200">
+            View All
+          </button>
+        </div>
+        <div className="space-y-2">
+          {activityItems.map((item) => (
+            <div key={item.text} className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 transition hover:border-sky-400/30">
+              <p className="text-sm text-slate-200">{item.text}</p>
+              <span className="text-xs text-slate-400">{item.time}</span>
+            </div>
           ))}
         </div>
-      )}
+      </article>
     </section>
   );
 }

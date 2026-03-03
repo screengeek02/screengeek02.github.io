@@ -184,3 +184,18 @@ body {
 .helio-logo-float {
   animation: helio-logo-float 3s ease-in-out infinite;
 }
+
+
+@keyframes helio-chart-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 4px rgba(34, 211, 238, 0.35));
+  }
+  50% {
+    filter: drop-shadow(0 0 12px rgba(56, 189, 248, 0.75));
+  }
+}
+
+.helio-chart-line {
+  animation: helio-chart-pulse 2.8s ease-in-out infinite;
+}
