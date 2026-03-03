@@ -1,7 +1,9 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
+import { BubbleBackground } from '@/components/BubbleBackground';
 import { DispatchMapMock } from '@/components/DispatchMapMock';
 import { SplashScreen } from '@/components/SplashScreen';
 
@@ -60,7 +62,31 @@ export default function HomePage() {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
       <main className={`transition-opacity duration-700 ${showSplash ? 'opacity-0' : 'opacity-100'}`}>
+        <header className="sticky top-0 z-30 border-b border-slate-700/70 bg-slate-950/70 backdrop-blur-md">
+          <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
+            <Link href="/" className="inline-flex items-center gap-2 text-slate-100">
+              <Image src="/logo.png" alt="Helio logo" width={32} height={32} className="h-8 w-8 rounded-lg object-contain" />
+              <span className="text-sm font-semibold tracking-wide">Helio</span>
+            </Link>
+            <nav className="flex items-center gap-2">
+              <Link
+                href="/"
+                className="rounded-lg border border-slate-700 bg-slate-900/70 px-3 py-1.5 text-xs font-medium text-slate-200 transition hover:border-sky-400/50 hover:text-sky-200"
+              >
+                Home
+              </Link>
+              <Link
+                href="/book"
+                className="rounded-lg bg-sky-500/90 px-3 py-1.5 text-xs font-semibold text-slate-950 transition hover:bg-sky-400 hover:shadow-[0_0_18px_rgba(56,189,248,0.45)]"
+              >
+                Book Now
+              </Link>
+            </nav>
+          </div>
+        </header>
+
         <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 text-white">
+          <BubbleBackground className="opacity-20" />
           <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_52%)]" />
           <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(148,163,184,0.3)_1px,transparent_1px),linear-gradient(to_right,rgba(148,163,184,0.3)_1px,transparent_1px)] [background-size:42px_42px]" />
           <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.35),transparent_70%)]" />

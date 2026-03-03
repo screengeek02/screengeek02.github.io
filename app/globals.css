@@ -168,3 +168,19 @@ body {
   animation-delay: 250ms;
 }
 
+
+@keyframes helio-logo-float {
+  0% {
+    transform: translateY(-6px);
+  }
+  50% {
+    transform: translateY(6px);
+  }
+  100% {
+    transform: translateY(-6px);
+  }
+}
+
+.helio-logo-float {
+  animation: helio-logo-float 3s ease-in-out infinite;
+}
