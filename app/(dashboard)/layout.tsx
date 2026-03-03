@@ -1,6 +1,7 @@
 'use client';
 
 import type { Route } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import type { ReactNode } from 'react';
@@ -59,12 +60,16 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           sidebarOpen ? 'translate-x-0' : '-translate-x-full',
         )}
       >
-        <div className="mb-8 flex items-center gap-3 rounded-xl border border-sky-400/20 bg-slate-900/70 px-3 py-2 shadow-[0_0_24px_rgba(56,189,248,0.18)]">
-          <div className="h-9 w-9 rounded-lg bg-gradient-to-br from-sky-400 to-blue-600" />
-          <div>
-            <p className="text-xl font-semibold tracking-tight">Helio</p>
-            <p className="text-xs text-slate-400">Dispatch Platform</p>
-          </div>
+        <div className="mb-8 rounded-xl border border-sky-400/20 bg-slate-900/70 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.18)]">
+          <Image
+            src="/image/logo.png"
+            alt="Helio Logo"
+            width={140}
+            height={40}
+            priority
+            className="h-8 w-auto"
+          />
+          <p className="mt-2 text-xs text-slate-400">Dispatch Platform</p>
         </div>
 
         <nav className="space-y-1.5">
