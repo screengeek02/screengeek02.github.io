@@ -3,6 +3,7 @@
 import { JobStatus } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DashboardKpiCard } from '@/components/dashboard-kpi-card';
+import { AvatarSpot } from '@/components/avatar-spot';
 import { DispatchMapMock } from '@/components/DispatchMapMock';
 import { StatusBadge } from '@/components/status-badge';
 
@@ -173,7 +174,7 @@ export default function AdminDashboard() {
               <div key={job.id} className="rounded-xl border border-slate-700 bg-slate-950/60 p-3">
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex items-center gap-3">
-                    <div className="h-9 w-9 rounded-full bg-slate-700" />
+                    <AvatarSpot name={job.customerName} />
                     <div>
                       <p className="font-semibold text-slate-100">{job.customerName}</p>
                       <p className="text-sm text-slate-400">{job.serviceType}</p>
@@ -214,7 +215,7 @@ export default function AdminDashboard() {
             {cleanerAvailability.map((worker) => (
               <div key={worker.id} className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-950/60 p-3">
                 <div className="flex items-center gap-3">
-                  <div className="h-9 w-9 rounded-full bg-slate-700" />
+                  <AvatarSpot name={worker.name} />
                   <p className="font-medium text-slate-100">{worker.name}</p>
                 </div>
                 <div className="flex items-center gap-2">

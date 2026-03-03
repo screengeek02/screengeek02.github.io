@@ -4,6 +4,7 @@ import { JobStatus } from '@prisma/client';
 import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AvailabilityToggle } from '@/components/availability-toggle';
+import { AvatarSpot } from '@/components/avatar-spot';
 import { StatusBadge } from '@/components/status-badge';
 
 type Job = {
@@ -136,11 +137,14 @@ export default function WorkerDashboard() {
           {upcomingJobs.map((job) => (
             <div key={job.id} className="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
               <div className="flex items-start justify-between gap-2">
-                <div>
-                  <h4 className="font-semibold text-slate-100">{job.customerName}</h4>
+                <div className="flex items-start gap-3">
+                  <AvatarSpot name={job.customerName} />
+                  <div>
+                    <h4 className="font-semibold text-slate-100">{job.customerName}</h4>
                   <p className="text-sm text-slate-300">{job.serviceType}</p>
                   <p className="text-sm text-slate-400">{job.address}</p>
                   <p className="mt-1 text-sm text-slate-400">{new Date(job.scheduledDate).toLocaleString()}</p>
+                  </div>
                 </div>
                 <StatusBadge status={job.status} />
               </div>
