@@ -110,9 +110,9 @@ export default function HomePage() {
               {metrics.map((metric, index) => (
                 <div
                   key={metric.label}
-                  className={`flex items-center gap-3 rounded-lg px-4 py-3 sm:rounded-none sm:px-5 sm:py-4 ${
+                  className={`helio-fade-up flex items-center gap-3 rounded-lg px-4 py-3 sm:rounded-none sm:px-5 sm:py-4 ${
                     index > 0 ? 'sm:border-l sm:border-slate-700' : ''
-                  }`}
+                  } ${index === 0 ? 'helio-fade-delay-1' : index === 1 ? 'helio-fade-delay-2' : 'helio-fade-delay-3'}`}
                 >
                   <span className="text-lg text-slate-400">{metric.icon}</span>
                   <p className="text-sm text-slate-200">
@@ -131,7 +131,7 @@ export default function HomePage() {
               {steps.map((step) => (
                 <article
                   key={step.title}
-                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
+                  className="helio-fade-up rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-base font-semibold text-sky-200">
                     {step.icon}
@@ -151,7 +151,7 @@ export default function HomePage() {
               {features.map((feature) => (
                 <article
                   key={feature.title}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-6 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md"
+                  className="helio-fade-up rounded-xl border border-slate-200 bg-slate-50 p-6 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{feature.text}</p>

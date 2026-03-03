@@ -139,3 +139,32 @@ body {
   transform-origin: left center;
   opacity: 0.95;
 }
+
+
+@keyframes helio-fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 14px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.helio-fade-up {
+  animation: helio-fade-up 650ms ease-out both;
+}
+
+.helio-fade-delay-1 {
+  animation-delay: 90ms;
+}
+
+.helio-fade-delay-2 {
+  animation-delay: 170ms;
+}
+
+.helio-fade-delay-3 {
+  animation-delay: 250ms;
+}
+
