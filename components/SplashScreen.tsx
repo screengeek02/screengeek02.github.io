@@ -37,7 +37,7 @@ export function SplashScreen({ onComplete, durationMs = 1800 }: SplashScreenProp
       <BubbleBackground className="opacity-80" />
       <div className="relative z-10 text-center text-white">
         <Image
-          src="/logo.png"
+          src="/image/logo.png"
           alt="Helio logo"
           width={96}
           height={96}
