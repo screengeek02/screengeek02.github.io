@@ -189,7 +189,6 @@ export function LiveDispatchMap() {
       }
 
       const mapbox = await import('mapbox-gl');
-      await import('mapbox-gl/dist/mapbox-gl.css');
       if (!mounted || !containerRef.current) return;
 
       mapboxRef.current = mapbox;
