@@ -5,3 +5,34 @@
 body {
   @apply bg-slate-50 text-slate-900;
 }
+
+@keyframes helio-bubble-rise {
+  0% {
+    transform: translate3d(0, 110%, 0) scale(0.85);
+    opacity: 0;
+  }
+  20% {
+    opacity: var(--opacity, 0.35);
+  }
+  100% {
+    transform: translate3d(12px, -120%, 0) scale(1.1);
+    opacity: 0;
+  }
+}
+
+.helio-bubble {
+  position: absolute;
+  bottom: -120px;
+  left: var(--left);
+  width: var(--size);
+  height: var(--size);
+  border-radius: 9999px;
+  background: radial-gradient(circle at 30% 30%, rgba(255, 255, 255, 0.82), rgba(255, 255, 255, 0.08));
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  box-shadow: inset 0 0 18px rgba(255, 255, 255, 0.3), 0 8px 24px rgba(56, 189, 248, 0.2);
+  backdrop-filter: blur(2px);
+  filter: blur(var(--blur));
+  animation: helio-bubble-rise var(--duration) linear infinite;
+  animation-delay: var(--delay);
+  will-change: transform, opacity;
+}
