@@ -4,7 +4,7 @@ import { JobStatus } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DashboardKpiCard } from '@/components/dashboard-kpi-card';
 import { AvatarSpot } from '@/components/avatar-spot';
-import { DispatchMapMock } from '@/components/DispatchMapMock';
+import { LiveDispatchMap } from '@/components/LiveDispatchMap';
 import { StatusBadge } from '@/components/status-badge';
 
 type Job = {
@@ -148,7 +148,7 @@ export default function AdminDashboard() {
         <h2 className="text-3xl font-semibold tracking-tight text-white">Live Dispatch in Punta Cana</h2>
         <p className="mt-1 text-sm text-slate-400">See how Helio assigns and routes professional cleaners in real time.</p>
         <div className="mt-4">
-          <DispatchMapMock />
+          <LiveDispatchMap />
         </div>
         <div className="mt-4 grid gap-2 rounded-xl border border-slate-700 bg-slate-950/60 p-3 text-sm text-slate-300 md:grid-cols-3">
           <p>

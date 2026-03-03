@@ -199,3 +199,44 @@ body {
 .helio-chart-line {
   animation: helio-chart-pulse 2.8s ease-in-out infinite;
 }
+
+
+.helio-map-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.45s ease, left 0.45s ease, top 0.45s ease;
+}
+
+.helio-map-marker-core {
+  width: 10px;
+  height: 10px;
+  border-radius: 9999px;
+}
+
+.helio-map-marker-worker {
+  background: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 0 8px rgba(56, 189, 248, 0.14), 0 0 16px rgba(56, 189, 248, 0.6);
+  animation: dispatch-pulse 2s ease-in-out infinite;
+}
+
+.helio-map-marker-worker .helio-map-marker-core {
+  background: #38bdf8;
+}
+
+.helio-map-marker-job {
+  width: 24px;
+  height: 24px;
+  background: rgba(239, 68, 68, 0.25);
+  box-shadow: 0 0 0 10px rgba(239, 68, 68, 0.18), 0 0 20px rgba(239, 68, 68, 0.75);
+  animation: dispatch-pulse 1.65s ease-in-out infinite;
+}
+
+.helio-map-marker-job .helio-map-marker-core {
+  width: 13px;
+  height: 13px;
+  background: #ef4444;
+}
