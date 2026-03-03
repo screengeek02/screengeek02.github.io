@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
 import { SplashScreen } from '@/components/SplashScreen';
+import { DispatchMapMock } from '@/components/DispatchMapMock';
 
 const stats = [
   { label: 'Jobs Completed Today', value: '24' },
@@ -101,6 +102,20 @@ export default function HomePage() {
                 <p className="mt-1 text-lg font-semibold text-slate-900">{item.value}</p>
               </div>
             ))}
+          </div>
+        </section>
+
+
+
+        <section className="bg-slate-950 py-14 md:py-20">
+          <div className="mx-auto max-w-6xl px-4">
+            <h2 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">Live Dispatch in Punta Cana</h2>
+            <p className="mt-3 max-w-2xl text-sm text-slate-300 md:text-base">
+              See how Helio assigns and routes professional cleaners in real time.
+            </p>
+            <div className="mt-6">
+              <DispatchMapMock />
+            </div>
           </div>
         </section>
 
