@@ -23,13 +23,14 @@ const navItems: NavItem[] = [
   { label: 'Job Management', href: '/worker/jobs', icon: '▤', roles: ['worker'] },
   { label: 'Workers', icon: '◉', roles: ['admin'] },
   { label: 'Availability', icon: '◌', roles: ['admin', 'worker'] },
-  { label: 'Scheduling', icon: '◧', roles: ['admin', 'worker'] },
+  { label: 'Scheduling', href: '/admin/scheduling', icon: '◧', roles: ['admin'] },
   { label: 'Settings', icon: '⚙', roles: ['admin', 'worker'] },
 ];
 
 function getPageTitle(pathname: string) {
   if (pathname.includes('/jobs/')) return 'Job Details';
   if (pathname.endsWith('/jobs')) return 'Job Management';
+  if (pathname.endsWith('/scheduling')) return 'Scheduling';
   return 'Dashboard';
 }
 
