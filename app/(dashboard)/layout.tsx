@@ -9,33 +9,27 @@ import { LogoutButton } from '@/components/logout-button';
 
 type NavItem = {
   label: string;
-  href?: Route;
+  href: Route;
+  icon: string;
 };
 
 export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const isAdmin = pathname.startsWith('/admin');
 
-  const primaryNav: NavItem[] = isAdmin
-    ? [
-        { label: 'Dashboard', href: '/admin/dashboard' },
-        { label: 'Job Management', href: '/admin/jobs' },
-        { label: 'Workers' },
-        { label: 'Availability' },
-        { label: 'Scheduling' },
-        { label: 'Settings' },
-      ]
-    : [
-        { label: 'Dashboard', href: '/worker/dashboard' },
-        { label: 'Job Management', href: '/worker/jobs' },
-        { label: 'Workers' },
-        { label: 'Availability' },
-        { label: 'Scheduling' },
-        { label: 'Settings' },
-      ];
+  const dashboardRoute: Route = isAdmin ? '/admin/dashboard' : '/worker/dashboard';
+  const jobsRoute: Route = isAdmin ? '/admin/jobs' : '/worker/jobs';
 
-  const title = 'Dashboard';
-  const subtitle = isAdmin ? 'Welcome, Admin Dispatcher' : 'Welcome, Field Cleaner';
+  const primaryNav: NavItem[] = [
+    { label: 'Dashboard', href: dashboardRoute, icon: '▦' },
+    { label: 'Job Management', href: jobsRoute, icon: '▤' },
+    { label: 'Workers', href: dashboardRoute, icon: '◉' },
+    { label: 'Availability', href: dashboardRoute, icon: '◌' },
+    { label: 'Scheduling', href: dashboardRoute, icon: '◧' },
+    { label: 'Settings', href: dashboardRoute, icon: '⚙' },
+  ];
+
+  const subtitle = isAdmin ? 'Welcome, Carlos Admin' : 'Welcome, Team Worker';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-slate-100">
@@ -51,32 +45,21 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
           <nav className="space-y-1.5">
             {primaryNav.map((item) => {
-              const active = item.href ? pathname.startsWith(item.href) : false;
-
-              if (item.href) {
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className={clsx(
-                      'block rounded-xl border px-3 py-2.5 text-sm font-medium transition',
-                      active
-                        ? 'border-sky-400/35 bg-sky-500/15 text-sky-100 shadow-[0_0_20px_rgba(56,189,248,0.2)]'
-                        : 'border-transparent text-slate-300 hover:border-sky-300/20 hover:bg-slate-800/70 hover:text-white',
-                    )}
-                  >
-                    {item.label}
-                  </Link>
-                );
-              }
-
+              const active = pathname.startsWith(item.href);
               return (
-                <span
+                <Link
                   key={item.label}
-                  className="block rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-500"
+                  href={item.href}
+                  className={clsx(
+                    'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition',
+                    active
+                      ? 'border-sky-400/35 bg-sky-500/15 text-sky-100 shadow-[0_0_20px_rgba(56,189,248,0.2)]'
+                      : 'border-transparent text-slate-300 hover:border-sky-300/20 hover:bg-slate-800/70 hover:text-white',
+                  )}
                 >
-                  {item.label}
-                </span>
+                  <span className="text-slate-400">{item.icon}</span>
+                  <span>{item.label}</span>
+                </Link>
               );
             })}
           </nav>
@@ -86,7 +69,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           <header className="sticky top-0 z-20 border-b border-sky-400/15 bg-slate-950/70 px-4 py-3 backdrop-blur md:px-6">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div>
-                <h1 className="text-xl font-semibold tracking-tight text-white">{title}</h1>
+                <h1 className="text-xl font-semibold tracking-tight text-white">Dashboard</h1>
                 <div className="mt-1 flex items-center gap-2 text-sm text-slate-300">
                   <span>{subtitle}</span>
                   <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />

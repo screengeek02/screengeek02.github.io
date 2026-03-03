@@ -2,6 +2,7 @@
 
 import { JobStatus } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { DashboardKpiCard } from '@/components/dashboard-kpi-card';
 import { DispatchMapMock } from '@/components/DispatchMapMock';
 import { StatusBadge } from '@/components/status-badge';
 
@@ -18,9 +19,9 @@ type Job = {
 type Worker = { id: string; name: string };
 
 const activityItems = [
-  { text: 'Antonio Martinez booking expired', time: '22 min ago' },
-  { text: 'New villa cleaning request from Emily Johnson', time: '56 min ago' },
-  { text: 'Marisol Herrera job completed successfully', time: '1h ago' },
+  { text: 'Antonio Martinez booking expired', time: '22 min ago', icon: '⏱' },
+  { text: 'New villa cleaning request from Emily Johnson', time: '56 min ago', icon: '✦' },
+  { text: 'Marisol Herrera job completed successfully', time: '1h ago', icon: '✓' },
 ];
 
 export default function AdminDashboard() {
@@ -75,7 +76,12 @@ export default function AdminDashboard() {
       const d = new Date(job.scheduledDate);
       return d.getDate() === today.getDate() && d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
     }).length;
-    const activeCleaners = new Set(jobs.filter((j) => j.status === JobStatus.ASSIGNED || j.status === JobStatus.IN_PROGRESS).map((j) => j.assignedWorker?.id).filter(Boolean)).size;
+    const activeCleaners = new Set(
+      jobs
+        .filter((j) => j.status === JobStatus.ASSIGNED || j.status === JobStatus.IN_PROGRESS)
+        .map((j) => j.assignedWorker?.id)
+        .filter(Boolean),
+    ).size;
 
     return {
       jobsToday: todaysJobs,
@@ -99,7 +105,7 @@ export default function AdminDashboard() {
       const assignedJob = jobs.find((job) => job.assignedWorker?.id === worker.id && job.status === JobStatus.ASSIGNED);
 
       if (activeJob) return { ...worker, state: 'On Job' as const };
-      if (assignedJob) return { ...worker, state: 'Assigned' as const };
+      if (assignedJob) return { ...worker, state: 'Assign' as const };
       return { ...worker, state: 'Available' as const };
     });
   }, [workers, jobs]);
@@ -132,21 +138,9 @@ export default function AdminDashboard() {
       </div>
 
       <div className="grid gap-3 md:grid-cols-3">
-        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Jobs Today</p>
-          <p className="mt-2 text-3xl font-semibold text-sky-300">{stats.jobsToday}</p>
-          <p className="text-xs text-slate-400">15% vs yesterday</p>
-        </article>
-        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Active Cleaners</p>
-          <p className="mt-2 text-3xl font-semibold text-emerald-300">{stats.activeCleaners}</p>
-          <p className="text-xs text-slate-400">Live on routes</p>
-        </article>
-        <article className="rounded-xl border border-sky-300/15 bg-slate-900/75 p-4 shadow-[0_0_24px_rgba(56,189,248,0.1)]">
-          <p className="text-xs uppercase tracking-wide text-slate-400">Avg Arrival Time</p>
-          <p className="mt-2 text-3xl font-semibold text-cyan-300">{stats.avgArrival}</p>
-          <p className="text-xs text-slate-400">-7% from yesterday</p>
-        </article>
+        <DashboardKpiCard label="Jobs Today" value={stats.jobsToday} hint="15% vs yesterday" icon="🗂" tone="sky" />
+        <DashboardKpiCard label="Active Cleaners" value={stats.activeCleaners} hint="Live on routes" icon="👥" tone="emerald" />
+        <DashboardKpiCard label="Avg Arrival Time" value={stats.avgArrival} hint="-7% from yesterday" icon="⏱" tone="cyan" />
       </div>
 
       <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">
@@ -223,17 +217,25 @@ export default function AdminDashboard() {
                   <div className="h-9 w-9 rounded-full bg-slate-700" />
                   <p className="font-medium text-slate-100">{worker.name}</p>
                 </div>
-                <span
-                  className={`rounded-full px-3 py-1 text-xs font-medium ${
-                    worker.state === 'Available'
-                      ? 'bg-emerald-500/15 text-emerald-300'
-                      : worker.state === 'On Job'
-                        ? 'bg-amber-500/15 text-amber-300'
-                        : 'bg-sky-500/15 text-sky-300'
-                  }`}
-                >
-                  {worker.state}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-medium ${
+                      worker.state === 'Available'
+                        ? 'bg-emerald-500/15 text-emerald-300'
+                        : worker.state === 'On Job'
+                          ? 'bg-amber-500/15 text-amber-300'
+                          : 'bg-sky-500/15 text-sky-300'
+                    }`}
+                  >
+                    {worker.state}
+                  </span>
+                  <button
+                    type="button"
+                    className="rounded-lg border border-slate-600 px-2.5 py-1 text-xs font-medium text-slate-200 transition hover:border-sky-400/40 hover:text-sky-200"
+                  >
+                    Manage
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -275,7 +277,12 @@ export default function AdminDashboard() {
         <div className="space-y-2">
           {activityItems.map((item) => (
             <div key={item.text} className="flex items-center justify-between rounded-xl border border-slate-700 bg-slate-950/60 px-3 py-2 transition hover:border-sky-400/30">
-              <p className="text-sm text-slate-200">{item.text}</p>
+              <div className="flex items-center gap-2">
+                <span className="inline-flex h-6 w-6 items-center justify-center rounded-md border border-slate-600 bg-slate-800 text-xs text-slate-300">
+                  {item.icon}
+                </span>
+                <p className="text-sm text-slate-200">{item.text}</p>
+              </div>
               <span className="text-xs text-slate-400">{item.time}</span>
             </div>
           ))}
