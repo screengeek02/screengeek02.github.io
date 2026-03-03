@@ -210,16 +210,18 @@ export function BookingForm() {
       const json = (await response.json()) as SuccessPayload | ValidationErrorPayload | ServerErrorPayload;
 
       if (!response.ok) {
-        if (json.type === 'validation') {
+        if ('type' in json && json.type === 'validation') {
           applyApiValidationErrors(json);
+        } else if ('type' in json && json.type === 'server') {
+          setGlobalError(json.message ?? 'Unable to submit your booking right now.');
         } else {
-          setGlobalError(json.message ?? 'Unable to submit your booking right now. Please try again.');
+          setGlobalError('Unable to submit your booking right now.');
         }
         setLoading(false);
         return;
       }
 
-      if (!json.success) {
+      if (!('success' in json && json.success)) {
         setGlobalError('Unexpected booking response. Please try again.');
         setLoading(false);
         return;
