@@ -2,49 +2,49 @@
 
 import Link from 'next/link';
 import { useCallback, useState } from 'react';
-import { SplashScreen } from '@/components/SplashScreen';
 import { DispatchMapMock } from '@/components/DispatchMapMock';
+import { SplashScreen } from '@/components/SplashScreen';
 
-const stats = [
-  { label: 'Jobs Completed Today', value: '24' },
-  { label: 'Active Cleaners', value: '6' },
-  { label: 'Avg Arrival Time', value: '38 min' },
+const metrics = [
+  { label: 'Jobs Completed Today', value: '28', icon: '📄' },
+  { label: 'Active Cleaners', value: '7', icon: '👤' },
+  { label: 'Avg Arrival Time', value: '32 min', icon: '◷' },
 ];
 
 const steps = [
   {
     title: 'Request Service',
-    text: 'Choose your time, location, and cleaning type in under 60 seconds.',
-    icon: '01',
+    text: 'Choose service details and schedule your cleaning in under a minute.',
+    icon: '◉',
   },
   {
     title: 'We Dispatch',
-    text: 'Helio routes the best available cleaner across Punta Cana in real-time.',
-    icon: '02',
+    text: 'Helio instantly routes the best available cleaner in Punta Cana and Bavaro.',
+    icon: '⌁',
   },
   {
     title: 'Job Completed',
-    text: 'Track job status live and receive confirmation once your service is done.',
-    icon: '03',
+    text: 'Track progress in real time and confirm once your home is spotless.',
+    icon: '✓',
   },
 ];
 
 const features = [
   {
     title: 'Real-Time Dispatch',
-    text: 'Hybrid assignment model for faster cleaner coverage and better SLA performance.',
+    text: 'Live coordination for faster assignments and cleaner arrival visibility.',
   },
   {
     title: 'Role-Based Dashboard',
-    text: 'Dedicated command center for admins and a field-ready app experience for workers.',
+    text: 'A unified system for customers, cleaners, and dispatch admins.',
   },
   {
     title: 'Secure Payments Ready',
-    text: 'Architecture prepared for future card capture, payouts, and payment reconciliation.',
+    text: 'Prepared for trusted digital payments and streamlined payout workflows.',
   },
   {
     title: 'Eco Cleaning Standards',
-    text: 'Consistent, professional cleaning protocols with eco-conscious product choices.',
+    text: 'Consistent, eco-conscious cleaning protocols for villas and apartments.',
   },
 ];
 
@@ -60,78 +60,83 @@ export default function HomePage() {
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
 
       <main className={`transition-opacity duration-700 ${showSplash ? 'opacity-0' : 'opacity-100'}`}>
-        <section className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-slate-900 to-slate-900 text-white">
-          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.2),transparent_40%)]" />
-          <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:linear-gradient(rgba(148,163,184,0.35)_1px,transparent_1px),linear-gradient(to_right,rgba(148,163,184,0.35)_1px,transparent_1px)] [background-size:44px_44px]" />
+        <section className="relative overflow-hidden bg-gradient-to-b from-slate-950 via-slate-900 to-slate-900 text-white">
+          <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.18),transparent_52%)]" />
+          <div className="pointer-events-none absolute inset-0 opacity-25 [background-image:linear-gradient(rgba(148,163,184,0.3)_1px,transparent_1px),linear-gradient(to_right,rgba(148,163,184,0.3)_1px,transparent_1px)] [background-size:42px_42px]" />
+          <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.35),transparent_70%)]" />
 
-          <div className="relative mx-auto max-w-6xl px-4 py-20 md:py-28">
-            <span className="inline-flex items-center gap-2 rounded-full border border-sky-400/30 bg-sky-500/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.14em] text-sky-200">
-              <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
-              Live in Punta Cana
-            </span>
-
-            <h1 className="mt-6 max-w-3xl text-4xl font-semibold tracking-tight md:text-6xl">
+          <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 text-center md:pb-24 md:pt-24">
+            <h1 className="mx-auto max-w-4xl text-4xl font-semibold tracking-tight md:text-6xl">
               On-Demand Cleaning. Powered by Helio.
             </h1>
-            <p className="mt-5 max-w-2xl text-base text-slate-200 md:text-lg">
+            <p className="mx-auto mt-5 max-w-3xl text-base text-slate-200 md:text-lg">
               Book, dispatch, and manage professional cleaners across Punta Cana in minutes.
             </p>
 
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
               <Link
                 href="/book"
-                className="rounded-lg bg-sky-500 px-5 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+                className="inline-flex min-w-48 items-center justify-center rounded-lg bg-blue-500 px-6 py-3 text-sm font-semibold text-white transition hover:bg-blue-400"
               >
                 Book a Cleaning
               </Link>
               <Link
                 href="/login"
-                className="rounded-lg border border-slate-600 bg-slate-800/60 px-5 py-3 text-sm font-semibold text-slate-100 transition hover:bg-slate-700"
+                className="inline-flex min-w-48 items-center justify-center rounded-lg border border-slate-600 bg-slate-900/60 px-6 py-3 text-sm font-semibold text-slate-100 transition hover:bg-slate-800"
               >
                 Access Dashboard
               </Link>
             </div>
+
+            <div className="mt-7 inline-flex items-center gap-2 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-4 py-1.5 text-sm text-emerald-200">
+              <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400" />
+              Live in Punta Cana
+            </div>
           </div>
         </section>
 
-        <section className="border-y border-slate-200 bg-white">
-          <div className="mx-auto grid max-w-6xl gap-3 px-4 py-4 sm:grid-cols-3">
-            {stats.map((item) => (
-              <div key={item.label} className="rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
-                <p className="text-xs uppercase tracking-wide text-slate-500">{item.label}</p>
-                <p className="mt-1 text-lg font-semibold text-slate-900">{item.value}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-
-
-        <section className="bg-slate-950 py-14 md:py-20">
+        <section className="bg-slate-950 pb-14 md:pb-20">
           <div className="mx-auto max-w-6xl px-4">
             <h2 className="text-2xl font-semibold tracking-tight text-slate-100 md:text-3xl">Live Dispatch in Punta Cana</h2>
             <p className="mt-3 max-w-2xl text-sm text-slate-300 md:text-base">
               See how Helio assigns and routes professional cleaners in real time.
             </p>
+
             <div className="mt-6">
               <DispatchMapMock />
+            </div>
+
+            <div className="mt-6 grid gap-3 rounded-xl border border-slate-700/80 bg-slate-900/80 p-3 shadow-[0_0_0_1px_rgba(56,189,248,0.08)] sm:grid-cols-3 sm:gap-0 sm:p-0">
+              {metrics.map((metric, index) => (
+                <div
+                  key={metric.label}
+                  className={`flex items-center gap-3 rounded-lg px-4 py-3 sm:rounded-none sm:px-5 sm:py-4 ${
+                    index > 0 ? 'sm:border-l sm:border-slate-700' : ''
+                  }`}
+                >
+                  <span className="text-lg text-slate-400">{metric.icon}</span>
+                  <p className="text-sm text-slate-200">
+                    {metric.label}: <span className="font-semibold text-cyan-300">{metric.value}</span>
+                  </p>
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
         <section className="bg-slate-50 py-14 md:py-20">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">How Helio Works</h2>
+            <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">How It Works</h2>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
               {steps.map((step) => (
                 <article
                   key={step.title}
-                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                  className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-md"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-xs font-semibold tracking-wider text-sky-200">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-slate-900 text-base font-semibold text-sky-200">
                     {step.icon}
                   </div>
-                  <h3 className="mt-4 text-lg font-semibold text-slate-900">{step.title}</h3>
+                  <h3 className="mt-4 text-xl font-semibold text-slate-900">{step.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{step.text}</p>
                 </article>
               ))}
@@ -141,12 +146,12 @@ export default function HomePage() {
 
         <section className="bg-white py-14 md:py-20">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="text-2xl font-semibold tracking-tight text-slate-900 md:text-3xl">Platform Features</h2>
-            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+            <h2 className="text-center text-3xl font-semibold tracking-tight text-slate-900">Platform Features</h2>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               {features.map((feature) => (
                 <article
                   key={feature.title}
-                  className="rounded-xl border border-slate-200 bg-slate-50 p-6 transition hover:bg-white hover:shadow-sm"
+                  className="rounded-xl border border-slate-200 bg-slate-50 p-6 transition duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md"
                 >
                   <h3 className="text-lg font-semibold text-slate-900">{feature.title}</h3>
                   <p className="mt-2 text-sm leading-6 text-slate-600">{feature.text}</p>
@@ -156,15 +161,15 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="bg-slate-950 py-16 text-white">
+        <section className="bg-slate-950 py-16 text-white md:py-20">
           <div className="mx-auto max-w-4xl px-4 text-center">
-            <h2 className="text-3xl font-semibold tracking-tight md:text-4xl">Ready to Experience Helio?</h2>
-            <p className="mt-4 text-sm text-slate-300 md:text-base">
-              Join homeowners, Airbnb hosts, and expats using Helio to run cleaner, faster operations.
+            <h2 className="text-3xl font-semibold tracking-tight md:text-5xl">Ready to Experience Helio?</h2>
+            <p className="mx-auto mt-4 max-w-2xl text-sm text-slate-300 md:text-base">
+              Join homeowners, Airbnb hosts, and property managers using Helio for cleaner, faster operations.
             </p>
             <Link
               href="/book"
-              className="mt-8 inline-block rounded-lg bg-sky-500 px-6 py-3 text-sm font-semibold text-slate-950 transition hover:bg-sky-400"
+              className="mt-8 inline-flex items-center justify-center rounded-lg bg-blue-500 px-7 py-3 text-sm font-semibold text-white transition hover:bg-blue-400"
             >
               Book Your Cleaning Now
             </Link>

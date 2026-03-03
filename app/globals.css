@@ -103,15 +103,15 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 9999px;
-  background: #38bdf8;
-  box-shadow: 0 0 22px rgba(56, 189, 248, 0.9);
+  background: #f97316;
+  box-shadow: 0 0 24px rgba(249, 115, 22, 0.95);
 }
 
 .dispatch-job-ring {
   position: absolute;
   inset: -8px;
   border-radius: 9999px;
-  border: 2px solid rgba(56, 189, 248, 0.55);
+  border: 2px solid rgba(249, 115, 22, 0.6);
   animation: dispatch-pulse 1.9s ease-in-out infinite;
 }
 
@@ -121,12 +121,12 @@ body {
   top: -4px;
   white-space: nowrap;
   border-radius: 9999px;
-  border: 1px solid rgba(56, 189, 248, 0.35);
-  background: rgba(15, 23, 42, 0.85);
+  border: 1px solid rgba(249, 115, 22, 0.35);
+  background: rgba(15, 23, 42, 0.88);
   padding: 3px 9px;
   font-size: 11px;
   font-weight: 600;
-  color: rgb(186, 230, 253);
+  color: rgb(254, 215, 170);
   letter-spacing: 0.08em;
   text-transform: uppercase;
 }
