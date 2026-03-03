@@ -37,12 +37,13 @@ export function SplashScreen({ onComplete, durationMs = 1800 }: SplashScreenProp
       <BubbleBackground className="opacity-80" />
       <div className="relative z-10 text-center text-white">
         <Image
-          src="/image/logo.png"
+          src="/public/image/logo.png"
           alt="Helio logo"
-          width={96}
-          height={96}
+          width={500}
+          height={500}
           priority
-          className="helio-logo-float mx-auto h-20 w-20 rounded-2xl object-contain md:h-24 md:w-24"
+          unoptimized
+          className="helio-logo-float h-36 w-auto object-contain md:h-48 lg:h-56"
         />
         <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-5xl">Helio Cleaning</h1>
         <p className="mt-3 text-sm text-sky-100 md:text-base">Professional Cleaning in Punta Cana</p>

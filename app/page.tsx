@@ -65,7 +65,7 @@ export default function HomePage() {
         <header className="sticky top-0 z-30 border-b border-slate-700/70 bg-slate-950/70 backdrop-blur-md">
           <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
             <Link href="/" className="inline-flex items-center gap-2 text-slate-100">
-              <Image src="/image/logo.png" alt="Helio logo" width={32} height={32} className="h-8 w-8 rounded-lg object-contain" />
+              <Image src="/public/image/logo.png" alt="Helio logo" width={220} height={80} priority unoptimized className="h-14 w-auto object-contain md:h-16" />
               <span className="text-sm font-semibold tracking-wide">Helio</span>
             </Link>
             <nav className="flex items-center gap-2">

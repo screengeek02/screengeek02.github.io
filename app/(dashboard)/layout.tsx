@@ -62,12 +62,13 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       >
         <div className="mb-8 rounded-xl border border-sky-400/20 bg-slate-900/70 px-3 py-3 shadow-[0_0_24px_rgba(56,189,248,0.18)]">
           <Image
-            src="/image/logo.png"
-            alt="Helio Logo"
-            width={140}
-            height={40}
+            src="/public/image/logo.png"
+            alt="Helio logo"
+            width={220}
+            height={80}
             priority
-            className="h-8 w-auto"
+            unoptimized
+            className="h-14 w-auto object-contain md:h-16"
           />
           <p className="mt-2 text-xs text-slate-400">Dispatch Platform</p>
         </div>
