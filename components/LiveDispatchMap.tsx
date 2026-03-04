@@ -6,7 +6,6 @@ import {
   DispatchJob,
   DispatchSuggestion,
   DispatchWorker,
-  haversineDistanceKm,
   suggestClosestWorker,
 } from '@/lib/dispatch';
 
@@ -43,7 +42,7 @@ const ROUTE_LAYER_ID = 'dispatch-route';
 
 function createWorkerMarkerElement(worker: DispatchWorker) {
   const el = document.createElement('div');
-  el.className = 'helio-map-marker helio-map-marker-worker';
+  el.className = `helio-map-marker helio-map-marker-worker${worker.status === 'AVAILABLE' ? ' is-active' : ''}`;
   el.setAttribute('title', `${worker.name} (${worker.status})`);
 
   const core = document.createElement('span');
@@ -105,10 +104,7 @@ export function LiveDispatchMap() {
 
     const source = map.getSource(ROUTE_SOURCE_ID) as import('mapbox-gl').GeoJSONSource | undefined;
     if (source) {
-      source.setData({
-        type: 'FeatureCollection',
-        features: [],
-      });
+      source.setData({ type: 'FeatureCollection', features: [] });
     }
 
     popupRef.current?.remove();
@@ -121,27 +117,31 @@ export function LiveDispatchMap() {
     if (!map) return;
 
     const source = map.getSource(ROUTE_SOURCE_ID) as import('mapbox-gl').GeoJSONSource | undefined;
-    if (source) {
-      source.setData({
-        type: 'FeatureCollection',
-        features: [
-          {
-            type: 'Feature',
-            properties: {},
-            geometry: {
-              type: 'LineString',
-              coordinates,
-            },
+    if (!source) return;
+
+    source.setData({
+      type: 'FeatureCollection',
+      features: [
+        {
+          type: 'Feature',
+          properties: {},
+          geometry: {
+            type: 'LineString',
+            coordinates,
           },
-        ],
-      });
-    }
+        },
+      ],
+    });
   }, []);
 
   const fetchDirections = useCallback(
     async (worker: DispatchWorker, job: DispatchJob) => {
+      if (typeof worker.lastLatitude !== 'number' || typeof worker.lastLongitude !== 'number') {
+        throw new Error('Selected worker has no live GPS location yet.');
+      }
+
       const url = new URL(
-        `https://api.mapbox.com/directions/v5/mapbox/driving/${worker.longitude},${worker.latitude};${job.longitude},${job.latitude}`,
+        `https://api.mapbox.com/directions/v5/mapbox/driving/${worker.lastLongitude},${worker.lastLatitude};${job.longitude},${job.latitude}`,
       );
       url.searchParams.set('geometries', 'geojson');
       url.searchParams.set('overview', 'full');
@@ -167,7 +167,7 @@ export function LiveDispatchMap() {
     async (job: DispatchJob) => {
       const suggestion = suggestClosestWorker(job, workers);
       if (!suggestion) {
-        setError('No AVAILABLE workers to dispatch for this job.');
+        setError('No AVAILABLE workers with live GPS coordinates for this job.');
         clearRoute();
         return;
       }
@@ -178,6 +178,7 @@ export function LiveDispatchMap() {
 
         const etaMinutes = Math.max(1, Math.round(route.duration / 60));
         const distanceKm = Number((route.distance / 1000).toFixed(1));
+
         setRouteState({
           jobId: job.id,
           worker: suggestion.worker,
@@ -189,18 +190,15 @@ export function LiveDispatchMap() {
         const map = mapRef.current;
         if (mapbox && map) {
           popupRef.current?.remove();
-
-          const popupHtml = `
-            <div style="font-family: ui-sans-serif,system-ui; color: #e2e8f0; background:#0f172a; padding:8px; border-radius:10px; border:1px solid rgba(56,189,248,.35)">
-              <div style="font-weight:700; color:#7dd3fc; margin-bottom:4px;">${suggestion.worker.name}</div>
-              <div style="font-size:12px;">Distance: ${distanceKm} km</div>
-              <div style="font-size:12px;">ETA: ${etaMinutes} minutes</div>
-            </div>
-          `;
-
           popupRef.current = new mapbox.Popup({ closeButton: false, offset: 18 })
             .setLngLat([job.longitude, job.latitude])
-            .setHTML(popupHtml)
+            .setHTML(
+              `<div style="font-family:ui-sans-serif,system-ui;color:#e2e8f0;background:#0f172a;padding:8px;border-radius:10px;border:1px solid rgba(56,189,248,.35)">
+                <div style="font-weight:700;color:#7dd3fc;margin-bottom:4px;">Cleaner: ${suggestion.worker.name}</div>
+                <div style="font-size:12px;">Distance: ${distanceKm} km</div>
+                <div style="font-size:12px;">ETA: ${etaMinutes} minutes</div>
+              </div>`,
+            )
             .addTo(map);
         }
 
@@ -218,20 +216,25 @@ export function LiveDispatchMap() {
       const mapbox = mapboxRef.current;
       if (!map || !mapbox) return;
 
-      const workerIds = new Set(nextWorkers.map((worker) => worker.id));
+      const renderableWorkers = nextWorkers.filter(
+        (worker) => typeof worker.lastLatitude === 'number' && typeof worker.lastLongitude === 'number',
+      );
+
+      const workerIds = new Set(renderableWorkers.map((worker) => worker.id));
       const jobIds = new Set(nextJobs.map((job) => job.id));
 
-      nextWorkers.forEach((worker) => {
+      renderableWorkers.forEach((worker) => {
+        const lngLat: [number, number] = [worker.lastLongitude as number, worker.lastLatitude as number];
         const existing = workerMarkersRef.current.get(worker.id);
+
         if (existing) {
-          existing.setLngLat([worker.longitude, worker.latitude]);
+          existing.setLngLat(lngLat);
+          existing.getElement().className = `helio-map-marker helio-map-marker-worker${worker.status === 'AVAILABLE' ? ' is-active' : ''}`;
           existing.getElement().setAttribute('title', `${worker.name} (${worker.status})`);
           return;
         }
 
-        const marker = new mapbox.Marker({ element: createWorkerMarkerElement(worker) })
-          .setLngLat([worker.longitude, worker.latitude])
-          .addTo(map);
+        const marker = new mapbox.Marker({ element: createWorkerMarkerElement(worker) }).setLngLat(lngLat).addTo(map);
         workerMarkersRef.current.set(worker.id, marker);
       });
 
@@ -433,7 +436,11 @@ export function LiveDispatchMap() {
             <span className="rounded-md bg-slate-800 px-2 py-1">Cleaner: {routeState.worker.name}</span>
             <span className="rounded-md bg-slate-800 px-2 py-1">Distance: {routeState.distanceKm} km</span>
             <span className="rounded-md bg-slate-800 px-2 py-1">ETA: {routeState.etaMinutes} min</span>
-            <span className={`rounded-md px-2 py-1 ${statusBadgeClass(jobs.find((job) => job.id === routeState.jobId)?.status ?? 'PENDING')}`}>
+            <span
+              className={`rounded-md px-2 py-1 ${statusBadgeClass(
+                jobs.find((job) => job.id === routeState.jobId)?.status ?? 'PENDING',
+              )}`}
+            >
               {jobs.find((job) => job.id === routeState.jobId)?.status.replace('_', ' ')}
             </span>
             <button

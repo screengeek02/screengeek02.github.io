@@ -3,8 +3,9 @@ export type DispatchWorkerStatus = 'AVAILABLE' | 'BUSY';
 export type DispatchWorker = {
   id: string;
   name: string;
-  latitude: number;
-  longitude: number;
+  lastLatitude: number | null;
+  lastLongitude: number | null;
+  lastUpdated: string | null;
   status: DispatchWorkerStatus;
   assignedJobsCount: number;
 };
@@ -52,14 +53,19 @@ export function haversineDistanceKm(
 }
 
 export function suggestClosestWorker(job: DispatchJob, workers: DispatchWorker[]): DispatchSuggestion | null {
-  const availableWorkers = workers.filter((worker) => worker.status === 'AVAILABLE');
+  const availableWorkers = workers.filter(
+    (worker) => worker.status === 'AVAILABLE' && typeof worker.lastLatitude === 'number' && typeof worker.lastLongitude === 'number',
+  );
   if (availableWorkers.length === 0) return null;
 
   let selectedWorker: DispatchWorker | null = null;
   let smallestDistance = Number.POSITIVE_INFINITY;
 
   availableWorkers.forEach((worker) => {
-    const distance = haversineDistanceKm(worker, job);
+    const distance = haversineDistanceKm(
+      { latitude: worker.lastLatitude ?? 0, longitude: worker.lastLongitude ?? 0 },
+      job,
+    );
     if (distance < smallestDistance) {
       smallestDistance = distance;
       selectedWorker = worker;

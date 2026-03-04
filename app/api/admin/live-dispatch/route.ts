@@ -34,7 +34,11 @@ export async function GET() {
   }
 
   const [workers, jobs] = await Promise.all([
-    db.user.findMany({ where: { role: Role.WORKER }, select: { id: true, name: true }, orderBy: { name: 'asc' } }),
+    db.user.findMany({
+      where: { role: Role.WORKER },
+      select: { id: true, name: true, lastLatitude: true, lastLongitude: true, lastUpdated: true },
+      orderBy: { name: 'asc' },
+    }),
     db.job.findMany({
       where: {
         status: {
@@ -62,14 +66,14 @@ export async function GET() {
   });
 
   const workerPayload: DispatchWorker[] = workers.map((worker) => {
-    const coord = generateCoordinate(worker.id);
     const assignedJobsCount = activeAssignments.get(worker.id) ?? 0;
 
     return {
       id: worker.id,
       name: worker.name,
-      latitude: coord.latitude,
-      longitude: coord.longitude,
+      lastLatitude: worker.lastLatitude,
+      lastLongitude: worker.lastLongitude,
+      lastUpdated: worker.lastUpdated ? worker.lastUpdated.toISOString() : null,
       status: assignedJobsCount > 0 ? 'BUSY' : 'AVAILABLE',
       assignedJobsCount,
     };
