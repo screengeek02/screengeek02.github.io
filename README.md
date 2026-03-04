@@ -83,6 +83,16 @@ Includes:
    ```bash
    npm run db:seed
    ```
+
+### Worker GPS tracking migration
+
+To add worker GPS tracking support (`lastLatitude`, `lastLongitude`, `lastUpdated`), run:
+
+```bash
+npx prisma migrate dev --name add_worker_location
+npx prisma generate
+```
+
 5. Start dev server:
    ```bash
    npm run dev
