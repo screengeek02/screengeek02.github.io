@@ -36,7 +36,7 @@ export async function GET() {
   const [workers, jobs] = await Promise.all([
     db.user.findMany({
       where: { role: Role.WORKER },
-      select: { id: true, name: true, lastLatitude: true, lastLongitude: true, lastUpdated: true },
+      select: { id: true, name: true },
       orderBy: { name: 'asc' },
     }),
     db.job.findMany({
@@ -71,9 +71,9 @@ export async function GET() {
     return {
       id: worker.id,
       name: worker.name,
-      lastLatitude: worker.lastLatitude,
-      lastLongitude: worker.lastLongitude,
-      lastUpdated: worker.lastUpdated ? worker.lastUpdated.toISOString() : null,
+      lastLatitude: null,
+      lastLongitude: null,
+      lastUpdated: null,
       status: assignedJobsCount > 0 ? 'BUSY' : 'AVAILABLE',
       assignedJobsCount,
     };
