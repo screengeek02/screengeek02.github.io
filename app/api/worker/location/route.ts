@@ -1,7 +1,6 @@
 import { Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
-import { db } from '@/lib/db';
 
 export async function POST(request: Request) {
   const session = getSessionFromCookie();
@@ -15,17 +14,11 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid coordinates.' }, { status: 400 });
     }
 
-    await db.user.update({
-      where: { id: session.userId },
-      data: {
-        lastLatitude: json.latitude,
-        lastLongitude: json.longitude,
-        lastUpdated: new Date(),
-      },
+    return NextResponse.json({
+      success: true,
+      message: 'Location received (tracking disabled)',
     });
-
-    return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ error: 'Unable to update location.' }, { status: 500 });
+    return NextResponse.json({ error: 'Invalid location payload' }, { status: 400 });
   }
 }
