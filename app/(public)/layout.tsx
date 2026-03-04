@@ -4,7 +4,7 @@ import { getSessionFromCookie } from '@/lib/auth';
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const session = getSessionFromCookie();
-  const dashboardHref = session?.role === 'ADMIN' ? '/admin/dashboard' : '/worker/dashboard';
+  const dashboardHref = session?.role === 'ADMIN' ? '/admin/dashboard' : session?.role === 'WORKER' ? '/worker/dashboard' : '/dashboard';
 
   return (
     <div className="min-h-screen bg-slate-50">

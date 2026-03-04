@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { jwtVerify } from 'jose';
 import { SESSION_COOKIE } from './lib/auth';
 
+type MiddlewareRole = 'ADMIN' | 'WORKER' | 'CUSTOMER';
 type MiddlewareSession = {
-  role: 'ADMIN' | 'WORKER';
+  role: MiddlewareRole;
 };
 
 async function parseSession(request: NextRequest): Promise<MiddlewareSession | null> {
@@ -13,7 +14,7 @@ async function parseSession(request: NextRequest): Promise<MiddlewareSession | n
 
   try {
     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-    if (payload.role === 'ADMIN' || payload.role === 'WORKER') {
+    if (payload.role === 'ADMIN' || payload.role === 'WORKER' || payload.role === 'CUSTOMER') {
       return { role: payload.role };
     }
 
@@ -29,17 +30,30 @@ export async function middleware(request: NextRequest) {
 
   if (pathname.startsWith('/admin')) {
     if (!session) return NextResponse.redirect(new URL('/login', request.url));
-    if (session.role !== 'ADMIN') return NextResponse.redirect(new URL('/worker/dashboard', request.url));
+    if (session.role !== 'ADMIN') {
+      return NextResponse.redirect(new URL(session.role === 'WORKER' ? '/worker/dashboard' : '/dashboard', request.url));
+    }
   }
 
-  if (pathname.startsWith('/worker')) {
+  if (pathname.startsWith('/worker') && !pathname.startsWith('/worker/apply')) {
     if (!session) return NextResponse.redirect(new URL('/login', request.url));
-    if (session.role !== 'WORKER') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    if (session.role !== 'WORKER') {
+      return NextResponse.redirect(new URL(session.role === 'ADMIN' ? '/admin/dashboard' : '/dashboard', request.url));
+    }
   }
 
-  if (pathname === '/login' || pathname.startsWith('/login/')) {
-    if (session) {
+  if (pathname.startsWith('/dashboard')) {
+    if (!session) return NextResponse.redirect(new URL('/login', request.url));
+    if (session.role !== 'CUSTOMER') {
       return NextResponse.redirect(new URL(session.role === 'ADMIN' ? '/admin/dashboard' : '/worker/dashboard', request.url));
+    }
+  }
+
+  if (pathname === '/login' || pathname.startsWith('/login/') || pathname === '/signup' || pathname.startsWith('/signup/')) {
+    if (session) {
+      if (session.role === 'ADMIN') return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+      if (session.role === 'WORKER') return NextResponse.redirect(new URL('/worker/dashboard', request.url));
+      return NextResponse.redirect(new URL('/dashboard', request.url));
     }
   }
 
@@ -47,5 +61,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/worker/:path*', '/login', '/login/:path*'],
+  matcher: ['/admin/:path*', '/worker/:path*', '/dashboard', '/dashboard/:path*', '/login', '/login/:path*', '/signup', '/signup/:path*'],
 };

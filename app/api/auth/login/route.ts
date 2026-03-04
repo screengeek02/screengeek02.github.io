@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import { WorkerStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { createSessionToken, SESSION_COOKIE, SESSION_TTL_SECONDS } from '@/lib/auth';
@@ -17,6 +18,10 @@ export async function POST(request: Request) {
 
     const valid = await bcrypt.compare(parsed.data.password, user.passwordHash);
     if (!valid) return NextResponse.json({ error: 'Invalid email or password.' }, { status: 401 });
+
+    if (user.role === 'WORKER' && user.workerStatus !== WorkerStatus.APPROVED) {
+      return NextResponse.json({ error: 'Your account is awaiting admin approval.' }, { status: 403 });
+    }
 
     const token = createSessionToken({ userId: user.id, role: user.role, email: user.email, name: user.name });
 

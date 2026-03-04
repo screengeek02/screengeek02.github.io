@@ -6,6 +6,22 @@ export const loginSchema = z.object({
   password: z.string().min(8),
 });
 
+export const customerSignupSchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  password: z.string().min(8),
+  phone: z.string().min(7).optional().or(z.literal('')),
+});
+
+export const workerApplySchema = z.object({
+  name: z.string().min(2),
+  email: z.string().email(),
+  phone: z.string().min(7),
+  password: z.string().min(8),
+  city: z.string().min(2),
+  experience: z.string().min(2),
+});
+
 export const bookingSchema = z.object({
   customerName: z.string().min(2),
   customerPhone: z.string().min(7),

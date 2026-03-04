@@ -27,6 +27,7 @@ const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/worker/dashboard', icon: '▦', roles: ['worker'] },
   { label: 'Jobs', href: '/worker/jobs', icon: '▤', roles: ['worker'] },
   { label: 'Availability', href: '/worker/availability', icon: '◌', roles: ['worker'] },
+  { label: 'Profile', href: '/worker/profile', icon: '◍', roles: ['worker'] },
   { label: 'Settings', href: '/worker/settings', icon: '⚙', roles: ['worker'] },
 ];
 
@@ -37,6 +38,7 @@ function getPageTitle(pathname: string) {
   if (pathname.endsWith('/availability')) return 'Availability';
   if (pathname.endsWith('/scheduling')) return 'Scheduling';
   if (pathname.endsWith('/dispatch')) return 'Dispatch';
+  if (pathname.endsWith('/profile')) return 'Profile';
   if (pathname.endsWith('/settings')) return 'Settings';
   return 'Dashboard';
 }

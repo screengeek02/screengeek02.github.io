@@ -10,6 +10,13 @@ datasource db {
 enum Role {
   ADMIN
   WORKER
+  CUSTOMER
+}
+
+enum WorkerStatus {
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 enum JobStatus {
@@ -27,18 +34,22 @@ enum ServiceType {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  name         String
-  email        String   @unique
-  passwordHash String
-  role         Role
-  lastLatitude Float?
+  id            String       @id @default(cuid())
+  name          String
+  email         String       @unique
+  passwordHash  String
+  role          Role
+  phone         String?
+  city          String?
+  experience    String?
+  workerStatus  WorkerStatus?
+  lastLatitude  Float?
   lastLongitude Float?
-  lastUpdated  DateTime?
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  lastUpdated   DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
-  assignedJobs Job[]    @relation("AssignedWorkerJobs")
+  assignedJobs  Job[]        @relation("AssignedWorkerJobs")
 }
 
 model Job {
