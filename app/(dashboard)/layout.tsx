@@ -11,7 +11,7 @@ import { LogoutButton } from '@/components/logout-button';
 
 type NavItem = {
   label: string;
-  href?: Route;
+  href: Route;
   icon: string;
   roles: Array<'admin' | 'worker'>;
 };
@@ -19,18 +19,23 @@ type NavItem = {
 const navItems: NavItem[] = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: '▦', roles: ['admin'] },
   { label: 'Job Management', href: '/admin/jobs', icon: '▤', roles: ['admin'] },
-  { label: 'Dashboard', href: '/worker/dashboard', icon: '▦', roles: ['worker'] },
-  { label: 'Job Management', href: '/worker/jobs', icon: '▤', roles: ['worker'] },
-  { label: 'Workers', icon: '◉', roles: ['admin'] },
-  { label: 'Availability', icon: '◌', roles: ['admin', 'worker'] },
+  { label: 'Workers', href: '/admin/workers', icon: '◉', roles: ['admin'] },
+  { label: 'Availability', href: '/admin/availability', icon: '◌', roles: ['admin'] },
   { label: 'Scheduling', href: '/admin/scheduling', icon: '◧', roles: ['admin'] },
-  { label: 'Settings', icon: '⚙', roles: ['admin', 'worker'] },
+  { label: 'Settings', href: '/admin/settings', icon: '⚙', roles: ['admin'] },
+  { label: 'Dashboard', href: '/worker/dashboard', icon: '▦', roles: ['worker'] },
+  { label: 'Jobs', href: '/worker/jobs', icon: '▤', roles: ['worker'] },
+  { label: 'Availability', href: '/worker/availability', icon: '◌', roles: ['worker'] },
+  { label: 'Settings', href: '/worker/settings', icon: '⚙', roles: ['worker'] },
 ];
 
 function getPageTitle(pathname: string) {
   if (pathname.includes('/jobs/')) return 'Job Details';
   if (pathname.endsWith('/jobs')) return 'Job Management';
+  if (pathname.endsWith('/workers')) return 'Workers';
+  if (pathname.endsWith('/availability')) return 'Availability';
   if (pathname.endsWith('/scheduling')) return 'Scheduling';
+  if (pathname.endsWith('/settings')) return 'Settings';
   return 'Dashboard';
 }
 
@@ -76,19 +81,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
         <nav className="space-y-1.5">
           {sidebarItems.map((item) => {
-            const active = item.href ? pathname.startsWith(item.href) : false;
-
-            if (!item.href) {
-              return (
-                <span
-                  key={`${item.label}-${item.icon}`}
-                  className="flex items-center gap-2 rounded-xl border border-transparent px-3 py-2.5 text-sm font-medium text-slate-500"
-                >
-                  <span className="text-slate-500">{item.icon}</span>
-                  <span>{item.label}</span>
-                </span>
-              );
-            }
+            const active = pathname === item.href || pathname.startsWith(`${item.href}/`);
 
             return (
               <Link
@@ -98,7 +91,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 className={clsx(
                   'flex items-center gap-2 rounded-xl border px-3 py-2.5 text-sm font-medium transition',
                   active
-                    ? 'border-sky-400/35 bg-sky-500/15 text-sky-100 shadow-[0_0_20px_rgba(56,189,248,0.2)]'
+                    ? 'border-sky-500 bg-sky-900/40 text-white shadow-[0_0_20px_rgba(56,189,248,0.2)]'
                     : 'border-transparent text-slate-300 hover:border-sky-300/20 hover:bg-slate-800/70 hover:text-white',
                 )}
               >
