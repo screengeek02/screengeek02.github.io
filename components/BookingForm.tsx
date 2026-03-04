@@ -325,18 +325,19 @@ export function BookingForm() {
             />
           </Field>
 
-          <Field label="Scheduled time" error={errors.scheduledTime} fieldId="scheduledTime">
-            <input
-              id="scheduledTime"
-              value={values.scheduledTime}
-              onChange={(event) => updateField('scheduledTime', event.target.value)}
-              className={inputClass(Boolean(errors.scheduledTime))}
-              type="time"
-              aria-invalid={Boolean(errors.scheduledTime)}
-              aria-describedby={errors.scheduledTime ? 'scheduledTime-error' : undefined}
-              required
-            />
-          </Field>
+        <Field label="Scheduled time" error={errors.scheduledTime} fieldId="scheduledTime">
+          <input
+            id="scheduledTime"
+            name="scheduledTime"
+            value={values.scheduledTime}
+            onChange={(event) => updateField('scheduledTime', event.target.value)}
+            type="time"
+            className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
+            aria-invalid={Boolean(errors.scheduledTime)}
+            aria-describedby={errors.scheduledTime ? 'scheduledTime-error' : undefined}
+            required
+          />
+        </Field>
         </div>
 
         <Field label="Address" error={errors.address} fieldId="address">
