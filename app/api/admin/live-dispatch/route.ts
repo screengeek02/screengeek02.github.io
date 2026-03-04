@@ -2,19 +2,7 @@ import { JobStatus, Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
-
-type DispatchWorker = {
-  id: string;
-  name: string;
-  latitude: number;
-  longitude: number;
-};
-
-type ActiveJob = {
-  id: string;
-  latitude: number;
-  longitude: number;
-};
+import type { DispatchJob, DispatchWorker } from '@/lib/dispatch';
 
 const BASE_LAT = 18.5601;
 const BASE_LNG = -68.3725;
@@ -45,34 +33,62 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const [workers, activeJobs] = await Promise.all([
+  const [workers, jobs] = await Promise.all([
     db.user.findMany({ where: { role: Role.WORKER }, select: { id: true, name: true }, orderBy: { name: 'asc' } }),
     db.job.findMany({
-      where: { status: { in: [JobStatus.ASSIGNED, JobStatus.IN_PROGRESS] } },
-      select: { id: true, address: true },
-      orderBy: { updatedAt: 'desc' },
-      take: 12,
+      where: {
+        status: {
+          in: [JobStatus.PENDING, JobStatus.ASSIGNED, JobStatus.IN_PROGRESS],
+        },
+      },
+      select: {
+        id: true,
+        address: true,
+        customerName: true,
+        serviceType: true,
+        scheduledDate: true,
+        status: true,
+        assignedWorkerId: true,
+      },
+      orderBy: { scheduledDate: 'asc' },
+      take: 50,
     }),
   ]);
 
+  const activeAssignments = new Map<string, number>();
+  jobs.forEach((job) => {
+    if (!job.assignedWorkerId) return;
+    activeAssignments.set(job.assignedWorkerId, (activeAssignments.get(job.assignedWorkerId) ?? 0) + 1);
+  });
+
   const workerPayload: DispatchWorker[] = workers.map((worker) => {
     const coord = generateCoordinate(worker.id);
+    const assignedJobsCount = activeAssignments.get(worker.id) ?? 0;
+
     return {
       id: worker.id,
       name: worker.name,
       latitude: coord.latitude,
       longitude: coord.longitude,
+      status: assignedJobsCount > 0 ? 'BUSY' : 'AVAILABLE',
+      assignedJobsCount,
     };
   });
 
-  const jobPayload: ActiveJob[] = activeJobs.map((job) => {
+  const jobPayload: DispatchJob[] = jobs.map((job) => {
     const coord = generateCoordinate(`${job.id}-${job.address}`);
     return {
       id: job.id,
       latitude: coord.latitude,
       longitude: coord.longitude,
+      status: job.status,
+      serviceType: job.serviceType,
+      scheduledDate: job.scheduledDate.toISOString(),
+      address: job.address,
+      customerName: job.customerName,
+      assignedWorkerId: job.assignedWorkerId,
     };
   });
 
-  return NextResponse.json({ workers: workerPayload, activeJobs: jobPayload });
+  return NextResponse.json({ workers: workerPayload, jobs: jobPayload });
 }
