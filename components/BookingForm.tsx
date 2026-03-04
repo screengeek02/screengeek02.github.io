@@ -40,6 +40,10 @@ type SuccessPayload = {
   status: 'PENDING';
 };
 
+type AvailabilityPayload = {
+  slots: string[];
+};
+
 const SERVICE_OPTIONS: Array<{ label: string; value: ServiceType }> = [
   { label: 'Standard', value: ServiceType.STANDARD },
   { label: 'Deep', value: ServiceType.DEEP },
@@ -86,6 +90,9 @@ export function BookingForm() {
   const [successData, setSuccessData] = useState<{ jobId: string; scheduledDate: string } | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [slotsLoading, setSlotsLoading] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [slotsError, setSlotsError] = useState('');
   const [mounted, setMounted] = useState(false);
 
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
@@ -105,6 +112,46 @@ export function BookingForm() {
       window.clearTimeout(timer);
     };
   }, [showToast]);
+
+  useEffect(() => {
+    if (!values.scheduledDate) {
+      setAvailableSlots([]);
+      setSlotsError('');
+      return;
+    }
+
+    let active = true;
+    setSlotsLoading(true);
+    setSlotsError('');
+    setValues((prev) => ({ ...prev, scheduledTime: '' }));
+
+    const loadSlots = async () => {
+      try {
+        const response = await fetch(`/api/availability?date=${values.scheduledDate}`);
+        if (!response.ok) {
+          throw new Error('Could not load time slots.');
+        }
+
+        const json = (await response.json()) as AvailabilityPayload;
+        if (!active) return;
+        setAvailableSlots(json.slots);
+      } catch {
+        if (!active) return;
+        setAvailableSlots([]);
+        setSlotsError('Unable to load available time slots for this date.');
+      } finally {
+        if (active) {
+          setSlotsLoading(false);
+        }
+      }
+    };
+
+    void loadSlots();
+
+    return () => {
+      active = false;
+    };
+  }, [values.scheduledDate]);
 
   function validateForm(next: BookingValues) {
     const nextErrors: BookingErrors = {};
@@ -325,19 +372,38 @@ export function BookingForm() {
             />
           </Field>
 
-        <Field label="Scheduled time" error={errors.scheduledTime} fieldId="scheduledTime">
-          <input
-            id="scheduledTime"
-            name="scheduledTime"
-            value={values.scheduledTime}
-            onChange={(event) => updateField('scheduledTime', event.target.value)}
-            type="time"
-            className="rounded-xl border border-slate-700 bg-slate-900/70 px-4 py-3 text-slate-100 outline-none transition focus:border-sky-400 focus:ring-2 focus:ring-sky-400/30"
-            aria-invalid={Boolean(errors.scheduledTime)}
-            aria-describedby={errors.scheduledTime ? 'scheduledTime-error' : undefined}
-            required
-          />
-        </Field>
+          <Field label="Scheduled time" error={errors.scheduledTime} fieldId="scheduledTime">
+            <div id="scheduledTime" className="space-y-2" aria-live="polite">
+              {slotsLoading ? (
+                <p className="text-sm text-slate-300">Loading available slots...</p>
+              ) : availableSlots.length > 0 ? (
+                <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+                  {availableSlots.map((slot) => {
+                    const isSelected = values.scheduledTime === slot;
+                    return (
+                      <button
+                        key={slot}
+                        type="button"
+                        onClick={() => updateField('scheduledTime', slot)}
+                        className={`rounded-lg border px-4 py-2 text-sm transition ${
+                          isSelected
+                            ? 'border-sky-400 bg-sky-500 text-white'
+                            : 'border-slate-700 bg-slate-800 text-slate-100 hover:border-sky-400/70 hover:text-sky-200'
+                        }`}
+                        aria-pressed={isSelected}
+                      >
+                        {slot}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className="text-sm text-slate-300">No available slots for this date.</p>
+              )}
+
+              {slotsError && <p className="text-xs text-rose-300">{slotsError}</p>}
+            </div>
+          </Field>
         </div>
 
         <Field label="Address" error={errors.address} fieldId="address">
@@ -380,7 +446,7 @@ export function BookingForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={loading || !values.scheduledTime}
           className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-sky-500 px-4 py-2.5 text-sm font-semibold text-slate-950 transition hover:bg-sky-400 disabled:cursor-not-allowed disabled:opacity-60"
           aria-busy={loading}
         >
