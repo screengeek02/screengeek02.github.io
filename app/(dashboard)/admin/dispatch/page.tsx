@@ -4,7 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { CleanerFleetPanel } from '@/components/CleanerFleetPanel';
 import { DispatchMap, type DispatchMapJob, type DispatchMapWorker } from '@/components/DispatchMap';
 import { DispatchQueue } from '@/components/DispatchQueue';
-import type { DispatchJob, DispatchWorker } from '@/lib/dispatch';
+import type { DispatchJob, DispatchJobStatus, DispatchWorker } from '@/lib/dispatch';
 
 type LiveDispatchResponse = {
   workers: DispatchWorker[];
@@ -32,6 +32,14 @@ function fallbackCoordinate(seed: string) {
     latitude: Number((BASE_LAT + latOffset).toFixed(6)),
     longitude: Number((BASE_LNG + lngOffset).toFixed(6)),
   };
+}
+
+
+function mapStatusToJobState(status: DispatchJobStatus): DispatchMapJob['status'] {
+  if (status === 'PENDING') return 'PENDING';
+  if (status === 'ASSIGNED') return 'ASSIGNED';
+  if (status === 'IN_PROGRESS') return 'IN_PROGRESS';
+  return 'PENDING';
 }
 
 function resolveWorkerStatus(worker: DispatchWorker, jobs: DispatchJob[]): DispatchMapWorker['status'] {
@@ -96,7 +104,7 @@ export default function AdminDispatchPage() {
       serviceType: job.serviceType,
       scheduledDate: job.scheduledDate,
       assignedWorkerId: job.assignedWorkerId,
-      status: job.status,
+      status: mapStatusToJobState(job.status),
       latitude: job.latitude,
       longitude: job.longitude,
     }));
