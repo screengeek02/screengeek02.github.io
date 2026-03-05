@@ -17,11 +17,7 @@ export async function GET() {
       id: true,
       name: true,
       email: true,
-      phone: true,
-      city: true,
-      experience: true,
-      workerStatus: true,
-      createdAt: true,
+      role: true,
     },
     orderBy: { createdAt: 'desc' },
   });
