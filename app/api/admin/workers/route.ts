@@ -1,21 +1,17 @@
-import { Role, WorkerStatus } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-export async function GET(request: Request) {
+export async function GET(_: Request) {
   const session = getSessionFromCookie();
   if (!session || session.role !== Role.ADMIN) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { searchParams } = new URL(request.url);
-  const status = searchParams.get('status') as WorkerStatus | null;
-
   const workers = await db.user.findMany({
     where: {
       role: Role.WORKER,
-      ...(status ? { workerStatus: status } : {}),
     },
     select: {
       id: true,

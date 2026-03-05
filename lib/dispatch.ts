@@ -1,4 +1,4 @@
-export type DispatchWorkerStatus = 'AVAILABLE' | 'BUSY';
+export type DispatchWorkerState = 'AVAILABLE' | 'BUSY';
 
 export type DispatchWorker = {
   id: string;
@@ -6,7 +6,7 @@ export type DispatchWorker = {
   lastLatitude: number | null;
   lastLongitude: number | null;
   lastUpdated: string | null;
-  status: DispatchWorkerStatus;
+  status: DispatchWorkerState;
   assignedJobsCount: number;
 };
 

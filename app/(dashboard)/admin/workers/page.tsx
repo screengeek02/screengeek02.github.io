@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
-type WorkerStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+type ApprovalStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
 
 type Worker = {
   id: string;
@@ -11,7 +11,7 @@ type Worker = {
   phone?: string;
   city?: string;
   experience?: string;
-  status: WorkerStatus;
+  status: ApprovalStatus;
   createdAt: string;
 };
 
@@ -22,11 +22,11 @@ type ApiWorker = {
   phone: string | null;
   city: string | null;
   experience: string | null;
-  workerStatus: WorkerStatus | null;
+  workerStatus: ApprovalStatus | null;
   createdAt: string;
 };
 
-function statusTone(status: WorkerStatus) {
+function statusTone(status: ApprovalStatus) {
   if (status === 'APPROVED') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
   if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
   return 'bg-amber-500/15 text-amber-300 border-amber-500/30';

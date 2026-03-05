@@ -1,5 +1,5 @@
 import bcrypt from 'bcryptjs';
-import { Role, WorkerStatus } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { workerApplySchema } from '@/lib/validations';
@@ -27,7 +27,6 @@ export async function POST(request: Request) {
         experience: parsed.data.experience,
         passwordHash,
         role: Role.WORKER,
-        workerStatus: WorkerStatus.PENDING,
       },
     });
 

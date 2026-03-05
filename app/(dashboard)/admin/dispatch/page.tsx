@@ -42,7 +42,7 @@ function mapStatusToJobState(status: DispatchJobStatus): DispatchMapJob['status'
   return 'PENDING';
 }
 
-function resolveWorkerStatus(worker: DispatchWorker, jobs: DispatchJob[]): DispatchMapWorker['status'] {
+function resolveDispatchWorkerState(worker: DispatchWorker, jobs: DispatchJob[]): DispatchMapWorker['status'] {
   const workerJobs = jobs.filter((job) => job.assignedWorkerId === worker.id);
 
   if (workerJobs.some((job) => job.status === 'IN_PROGRESS')) return 'WORKING';
@@ -89,7 +89,7 @@ export default function AdminDispatchPage() {
         id: worker.id,
         name: worker.name,
         assignedJobsCount: worker.assignedJobsCount,
-        status: resolveWorkerStatus(worker, jobs),
+        status: resolveDispatchWorkerState(worker, jobs),
         latitude: worker.lastLatitude ?? fallback.latitude,
         longitude: worker.lastLongitude ?? fallback.longitude,
       };
