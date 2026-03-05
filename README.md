@@ -93,6 +93,15 @@ npx prisma migrate dev --name add_worker_location
 npx prisma generate
 ```
 
+### Worker approval status migration
+
+To add worker approval status support (`WorkerStatus` enum + `User.workerStatus`), run:
+
+```bash
+npx prisma migrate dev --name add_worker_status
+npx prisma generate
+```
+
 5. Start dev server:
    ```bash
    npm run dev

@@ -42,7 +42,7 @@ model User {
   phone         String?
   city          String?
   experience    String?
-  workerStatus  WorkerStatus?
+  workerStatus  WorkerStatus @default(PENDING)
   lastLatitude  Float?
   lastLongitude Float?
   lastUpdated   DateTime?
