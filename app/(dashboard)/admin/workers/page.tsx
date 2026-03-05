@@ -1,9 +1,21 @@
 'use client';
 
-import { WorkerStatus } from '@prisma/client';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 
+type WorkerStatus = 'PENDING' | 'APPROVED' | 'REJECTED';
+
 type Worker = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string;
+  city?: string;
+  experience?: string;
+  status: WorkerStatus;
+  createdAt: string;
+};
+
+type ApiWorker = {
   id: string;
   name: string;
   email: string;
@@ -14,9 +26,9 @@ type Worker = {
   createdAt: string;
 };
 
-function statusTone(status: WorkerStatus | null) {
-  if (status === WorkerStatus.APPROVED) return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
-  if (status === WorkerStatus.REJECTED) return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
+function statusTone(status: WorkerStatus) {
+  if (status === 'APPROVED') return 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30';
+  if (status === 'REJECTED') return 'bg-rose-500/15 text-rose-300 border-rose-500/30';
   return 'bg-amber-500/15 text-amber-300 border-amber-500/30';
 }
 
@@ -28,13 +40,25 @@ export default function AdminWorkersPage() {
   const loadWorkers = useCallback(async () => {
     setLoading(true);
     const response = await fetch('/api/admin/workers', { cache: 'no-store' });
-    const json = await response.json();
+    const json = (await response.json()) as ApiWorker[] | { error?: string };
     if (!response.ok) {
-      setError(json.error ?? 'Unable to load workers.');
+      setError((json as { error?: string }).error ?? 'Unable to load workers.');
       setLoading(false);
       return;
     }
-    setWorkers(json);
+
+    const mappedWorkers: Worker[] = (json as ApiWorker[]).map((worker) => ({
+      id: worker.id,
+      name: worker.name,
+      email: worker.email,
+      phone: worker.phone ?? undefined,
+      city: worker.city ?? undefined,
+      experience: worker.experience ?? undefined,
+      status: worker.workerStatus ?? 'PENDING',
+      createdAt: worker.createdAt,
+    }));
+
+    setWorkers(mappedWorkers);
     setError('');
     setLoading(false);
   }, []);
@@ -53,12 +77,9 @@ export default function AdminWorkersPage() {
     [loadWorkers],
   );
 
-  const pendingWorkers = useMemo(
-    () => workers.filter((worker) => (worker.workerStatus ?? WorkerStatus.PENDING) === WorkerStatus.PENDING),
-    [workers],
-  );
-  const approvedWorkers = useMemo(() => workers.filter((worker) => worker.workerStatus === WorkerStatus.APPROVED), [workers]);
-  const rejectedWorkers = useMemo(() => workers.filter((worker) => worker.workerStatus === WorkerStatus.REJECTED), [workers]);
+  const pendingWorkers = useMemo(() => workers.filter((worker) => worker.status === 'PENDING'), [workers]);
+  const approvedWorkers = useMemo(() => workers.filter((worker) => worker.status === 'APPROVED'), [workers]);
+  const rejectedWorkers = useMemo(() => workers.filter((worker) => worker.status === 'REJECTED'), [workers]);
 
   const groups = [
     { title: 'Pending Workers', items: pendingWorkers },
@@ -85,7 +106,7 @@ export default function AdminWorkersPage() {
               {!loading && group.items.length === 0 && <p className="text-xs text-slate-500">No workers in this state.</p>}
 
               {group.items.map((worker) => {
-                const status = worker.workerStatus ?? WorkerStatus.PENDING;
+                const status = worker.status;
 
                 return (
                   <div key={worker.id} className="rounded-lg border border-slate-800 bg-slate-950/70 p-3">
@@ -102,7 +123,7 @@ export default function AdminWorkersPage() {
                     {worker.experience && <p className="mt-2 text-xs text-slate-400">Experience: {worker.experience}</p>}
                     <p className="mt-1 text-xs text-slate-500">Applied: {new Date(worker.createdAt).toLocaleString()}</p>
 
-                    {status === WorkerStatus.PENDING && (
+                    {status === 'PENDING' && (
                       <div className="mt-3 flex gap-2">
                         <button
                           type="button"
