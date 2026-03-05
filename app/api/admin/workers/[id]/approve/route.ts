@@ -1,7 +1,8 @@
-import { Role, WorkerStatus } from '@prisma/client';
+import { Role } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
+
 
 export async function POST(_: Request, context: { params: { id: string } }) {
   const session = getSessionFromCookie();
@@ -11,7 +12,7 @@ export async function POST(_: Request, context: { params: { id: string } }) {
 
   await db.user.update({
     where: { id: context.params.id },
-    data: { workerStatus: WorkerStatus.APPROVED },
+    data: { workerStatus: 'APPROVED' },
   });
 
   return NextResponse.json({ success: true });
