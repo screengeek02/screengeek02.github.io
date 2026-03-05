@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
 
-export async function GET(_: Request) {
+export async function GET() {
   const session = getSessionFromCookie();
   if (!session || session.role !== Role.ADMIN) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
