@@ -1,7 +1,7 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useState } from 'react';
-import Logo from '@/components/Logo';
 import { BubbleBackground } from './BubbleBackground';
 
 type SplashScreenProps = {
@@ -35,8 +35,15 @@ export function SplashScreen({ onComplete, durationMs = 1800 }: SplashScreenProp
       aria-hidden={fadingOut}
     >
       <BubbleBackground className="opacity-80" />
-      <div className="relative z-10 text-center text-white">
-        <Logo />
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center text-center text-white">
+        <Image
+          src="/public/image/logo.png"
+          alt="Helio Cleaning"
+          width={220}
+          height={120}
+          priority
+          className="object-contain"
+        />
         <h1 className="mt-5 text-4xl font-semibold tracking-tight md:text-5xl">Helio Cleaning</h1>
         <p className="mt-3 text-sm text-sky-100 md:text-base">Professional Cleaning in Punta Cana</p>
       </div>

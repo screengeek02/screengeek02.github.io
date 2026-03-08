@@ -3,7 +3,7 @@ import Image from 'next/image';
 export default function Logo() {
   return (
     <Image
-      src="/image/logo.png"
+      src="/public/image/logo.png"
       alt="Helio logo"
       width={220}
       height={80}

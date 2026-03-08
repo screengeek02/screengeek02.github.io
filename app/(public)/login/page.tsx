@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import Logo from '@/components/Logo';
 import { FormEvent, useState } from 'react';
 
 export default function LoginPage() {
@@ -46,9 +45,6 @@ export default function LoginPage() {
   return (
     <section className="mx-auto max-w-md rounded-xl border border-slate-700/70 bg-slate-900/70 p-6 text-slate-100 shadow-xl">
 
-      <div className="mb-6 flex flex-col items-center">
-        <Logo />
-      </div>
 
       <h1 className="mb-2 text-2xl font-semibold">Login</h1>
       <p className="mb-4 text-sm text-slate-400">Access your admin, worker, or customer account.</p>

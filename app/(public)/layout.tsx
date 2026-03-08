@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import Logo from '@/components/Logo';
 import { LogoutButton } from '@/components/logout-button';
 import { getSessionFromCookie } from '@/lib/auth';
 
@@ -16,6 +15,12 @@ export default async function PublicLayout({ children }: { children: React.React
           </Link>
 
           <div className="flex items-center gap-2">
+            <Link
+              href="/"
+              className="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+            >
+              Home
+            </Link>
             {!session ? (
               <Link
                 href="/login"
@@ -37,12 +42,7 @@ export default async function PublicLayout({ children }: { children: React.React
           </div>
         </nav>
       </header>
-      <main className="mx-auto w-full max-w-5xl px-4 py-8">
-        <div className="flex justify-center py-6">
-          <Logo />
-        </div>
-        {children}
-      </main>
+      <main className="mx-auto w-full max-w-5xl px-4 py-8">{children}</main>
     </div>
   );
 }
