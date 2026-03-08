@@ -35,7 +35,7 @@ export default function CustomerSignupPage() {
       return;
     }
 
-    router.replace('/dashboard');
+    router.push('/login');
   }
 
   return (

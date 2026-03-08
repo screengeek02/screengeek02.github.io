@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Logo from '@/components/Logo';
 import { FormEvent, useState } from 'react';
 
@@ -8,6 +9,7 @@ export default function WorkerApplyPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,8 +39,9 @@ export default function WorkerApplyPage() {
       return;
     }
 
-    setSuccess(json.message ?? 'Application submitted. Awaiting approval.');
+    setSuccess('Account created successfully. Please log in to continue.');
     event.currentTarget.reset();
+    router.push('/login');
   }
 
   return (
