@@ -39,49 +39,38 @@ export function ScheduleBoard() {
     setError('');
 
     try {
-      const [jobsResponse, workersResponse] = await Promise.all([fetch('/api/admin/jobs'), fetch('/api/admin/workers')]);
-
-      if (!jobsResponse.ok || !workersResponse.ok) {
+      const jobsResponse = await fetch(`/api/admin/jobs?date=${filter}`);
+      if (!jobsResponse.ok) {
         throw new Error('Unable to load schedule data.');
       }
 
-      const [jobsJson, workersJson] = (await Promise.all([jobsResponse.json(), workersResponse.json()])) as [Job[], Worker[]];
+      const jobsJson = (await jobsResponse.json()) as Job[];
       setJobs(jobsJson);
-      setWorkers(workersJson);
+
+      const workersResponse = await fetch('/api/admin/workers');
+      if (workersResponse.ok) {
+        const workersJson = (await workersResponse.json()) as Array<Worker & { email?: string }>;
+        setWorkers(workersJson.map((worker) => ({ id: worker.id, name: worker.name })));
+      } else {
+        setWorkers([]);
+      }
     } catch {
       setError('Could not load scheduling data. Please refresh and try again.');
+      setJobs([]);
+      setWorkers([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [filter]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
-  const filteredJobs = useMemo(() => {
-    const now = new Date();
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const endOfToday = new Date(startOfToday);
-    endOfToday.setDate(endOfToday.getDate() + 1);
-
-    const endOfWeek = new Date(startOfToday);
-    endOfWeek.setDate(endOfWeek.getDate() + 7);
-
-    return jobs
-      .filter((job) => {
-        const scheduled = new Date(job.scheduledDate);
-        if (filter === 'today') return scheduled >= startOfToday && scheduled < endOfToday;
-        if (filter === 'week') return scheduled >= startOfToday && scheduled < endOfWeek;
-        return scheduled >= startOfToday;
-      })
-      .sort((a, b) => new Date(a.scheduledDate).getTime() - new Date(b.scheduledDate).getTime());
-  }, [filter, jobs]);
-
   const groupedJobs = useMemo<GroupedJobs[]>(() => {
     const groups = new Map<string, Job[]>();
 
-    filteredJobs.forEach((job) => {
+    jobs.forEach((job) => {
       const date = new Date(job.scheduledDate);
       const key = date.toISOString().split('T')[0];
       const bucket = groups.get(key) ?? [];
@@ -99,7 +88,7 @@ export function ScheduleBoard() {
         }),
         jobs: grouped,
       }));
-  }, [filteredJobs]);
+  }, [jobs]);
 
   const handleAssign = useCallback(
     async (jobId: string, workerId: string) => {

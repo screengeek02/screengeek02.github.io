@@ -9,30 +9,40 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const status = request.nextUrl.searchParams.get('status') as JobStatus | 'ALL' | null;
-  const dateFilter = request.nextUrl.searchParams.get('date');
+  try {
+    const status = request.nextUrl.searchParams.get('status') as JobStatus | 'ALL' | null;
+    const dateFilter = request.nextUrl.searchParams.get('date');
 
-  const where: Prisma.JobWhereInput = {};
-  if (status && status !== 'ALL') where.status = status;
+    const where: Prisma.JobWhereInput = {};
+    if (status && status !== 'ALL') where.status = status;
 
-  const now = new Date();
-  if (dateFilter === 'today') {
-    const start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    const end = new Date(start);
-    end.setDate(end.getDate() + 1);
-    where.scheduledDate = { gte: start, lt: end };
-  } else if (dateFilter === 'upcoming') {
-    where.scheduledDate = { gte: now };
-  } else if (dateFilter === 'past') {
-    where.scheduledDate = { lt: now };
+    const now = new Date();
+    const startOfToday = new Date(now);
+    startOfToday.setHours(0, 0, 0, 0);
+
+    if (dateFilter === 'today') {
+      const end = new Date(startOfToday);
+      end.setDate(end.getDate() + 1);
+      where.scheduledDate = { gte: startOfToday, lt: end };
+    } else if (dateFilter === 'week') {
+      const end = new Date(startOfToday);
+      end.setDate(end.getDate() + 7);
+      where.scheduledDate = { gte: startOfToday, lt: end };
+    } else if (dateFilter === 'upcoming') {
+      where.scheduledDate = { gte: startOfToday };
+    } else if (dateFilter === 'past') {
+      where.scheduledDate = { lt: startOfToday };
+    }
+
+    const jobs = await db.job.findMany({
+      where,
+      include: { assignedWorker: { select: { id: true, name: true } } },
+      orderBy: { scheduledDate: 'asc' },
+    });
+
+    return NextResponse.json(jobs);
+  } catch (error) {
+    console.error('Admin jobs fetch failed:', error);
+    return NextResponse.json({ error: 'Unable to load jobs.' }, { status: 500 });
   }
-
-  const jobs = await db.job.findMany({
-    where,
-    include: { assignedWorker: { select: { id: true, name: true } } },
-    orderBy: { scheduledDate: 'asc' },
-  });
-
-  return NextResponse.json(jobs);
 }
