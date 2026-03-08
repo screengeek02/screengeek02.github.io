@@ -20,5 +20,24 @@ export async function GET(_: Request, { params }: { params: { id: string } }) {
     return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
   }
 
+  if (session.role === Role.WORKER) {
+    return NextResponse.json({
+      id: job.id,
+      customerName: job.customerName,
+      customerPhone: job.customerPhone,
+      customerEmail: job.customerEmail,
+      address: job.address,
+      serviceType: job.serviceType,
+      scheduledDate: job.scheduledDate,
+      status: job.status,
+      cleanerPay: job.cleanerPay,
+      assignedWorkerId: job.assignedWorkerId,
+      assignedWorker: job.assignedWorker,
+      notes: job.notes,
+      createdAt: job.createdAt,
+      updatedAt: job.updatedAt,
+    });
+  }
+
   return NextResponse.json(job);
 }

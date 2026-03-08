@@ -11,6 +11,19 @@ export async function GET() {
 
   const jobs = await db.job.findMany({
     where: { assignedWorkerId: session.userId },
+    select: {
+      id: true,
+      customerName: true,
+      customerPhone: true,
+      address: true,
+      serviceType: true,
+      scheduledDate: true,
+      status: true,
+      cleanerPay: true,
+      assignedWorkerId: true,
+      createdAt: true,
+      updatedAt: true,
+    },
     orderBy: { scheduledDate: 'asc' },
   });
 

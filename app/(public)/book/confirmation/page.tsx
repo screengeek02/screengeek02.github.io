@@ -20,6 +20,9 @@ export default async function ConfirmationPage({
           <p><strong>Name:</strong> {job.customerName}</p>
           <p><strong>Scheduled:</strong> {new Date(job.scheduledDate).toLocaleString()}</p>
           <p><strong>Status:</strong> {job.status}</p>
+          <p><strong>Customer Price:</strong> RD${job.customerPrice.toLocaleString()}</p>
+          <p><strong>Cleaner Pay:</strong> RD${job.cleanerPay.toLocaleString()}</p>
+          <p><strong>Platform Fee:</strong> RD${job.platformFee.toLocaleString()}</p>
         </div>
       )}
       <Link href="/book" className="mt-5 inline-block text-blue-600">Book another service</Link>

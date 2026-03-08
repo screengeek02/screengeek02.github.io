@@ -2,6 +2,7 @@
 
 import { ServiceType } from '@prisma/client';
 import { useRouter } from 'next/navigation';
+import { getBasePriceForService } from '@/lib/pricing';
 import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 type BookingValues = {
@@ -96,6 +97,8 @@ export function BookingForm() {
   const [mounted, setMounted] = useState(false);
 
   const minDate = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  const currentServicePrice = useMemo(() => getBasePriceForService(values.serviceType), [values.serviceType]);
 
   useEffect(() => {
     setMounted(true);
@@ -355,6 +358,11 @@ export function BookingForm() {
               ))}
             </select>
           </Field>
+        </div>
+
+        <div className="rounded-xl border border-sky-400/30 bg-sky-500/10 px-4 py-3 text-sm text-sky-100">
+          <p className="font-semibold">Service price (includes platform fee)</p>
+          <p className="mt-1 text-lg font-bold">RD${currentServicePrice.toLocaleString()}</p>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">

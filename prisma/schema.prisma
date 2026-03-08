@@ -61,6 +61,9 @@ model Job {
   serviceType      ServiceType
   scheduledDate    DateTime
   status           JobStatus   @default(PENDING)
+  customerPrice    Int         @default(0)
+  platformFee      Int         @default(0)
+  cleanerPay       Int         @default(0)
   assignedWorkerId String?
   assignedWorker   User?       @relation("AssignedWorkerJobs", fields: [assignedWorkerId], references: [id])
   createdAt        DateTime    @default(now())

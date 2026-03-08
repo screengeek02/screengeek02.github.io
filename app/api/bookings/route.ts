@@ -1,6 +1,8 @@
 import { JobStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
+import { calculateCommission } from '@/lib/commission';
 import { db } from '@/lib/db';
+import { getBasePriceForService } from '@/lib/pricing';
 import { bookingSchema } from '@/lib/validations';
 
 export async function POST(request: Request) {
@@ -31,6 +33,9 @@ export async function POST(request: Request) {
       );
     }
 
+    const basePrice = getBasePriceForService(parsed.data.serviceType);
+    const pricingInfo = calculateCommission(basePrice);
+
     const job = await db.job.create({
       data: {
         customerName: parsed.data.customerName,
@@ -40,6 +45,9 @@ export async function POST(request: Request) {
         serviceType: parsed.data.serviceType,
         scheduledDate,
         status: JobStatus.PENDING,
+        customerPrice: pricingInfo.total,
+        platformFee: pricingInfo.platformFee,
+        cleanerPay: pricingInfo.cleanerPay,
         notes: parsed.data.notes
           ? {
               create: {
@@ -56,6 +64,9 @@ export async function POST(request: Request) {
       id: job.id,
       scheduledDate: job.scheduledDate.toISOString(),
       status: job.status,
+      customerPrice: job.customerPrice,
+      platformFee: job.platformFee,
+      cleanerPay: job.cleanerPay,
     });
   } catch (error) {
     console.error('Booking creation failed:', error);

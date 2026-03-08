@@ -13,6 +13,7 @@ type Job = {
   address: string;
   serviceType: string;
   status: JobStatus;
+  cleanerPay?: number;
   notes: { id: string; content: string }[];
 };
 
@@ -50,6 +51,7 @@ export default function WorkerJobDetails() {
       <p><strong>Service:</strong> {job.serviceType}</p>
       <p><strong>Scheduled:</strong> {new Date(job.scheduledDate).toLocaleString()}</p>
       <p><strong>Status:</strong> <StatusBadge status={job.status} /></p>
+      <p><strong>Your earnings:</strong> {typeof job.cleanerPay === 'number' ? `RD$${job.cleanerPay.toLocaleString()}` : 'N/A'}</p>
       <div className="flex gap-2">
         <button disabled={job.status !== JobStatus.ASSIGNED} onClick={start} className="rounded bg-blue-600 px-3 py-1 text-white disabled:bg-slate-300">Start Job</button>
         <button disabled={job.status !== JobStatus.IN_PROGRESS} onClick={complete} className="rounded bg-green-600 px-3 py-1 text-white disabled:bg-slate-300">Complete Job</button>
