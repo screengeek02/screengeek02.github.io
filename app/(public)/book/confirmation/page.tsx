@@ -7,7 +7,25 @@ export default async function ConfirmationPage({
   searchParams: { jobId?: string };
 }) {
   const job = searchParams.jobId
-    ? await db.job.findUnique({ where: { id: searchParams.jobId } })
+    ? await db.job.findUnique({
+        where: { id: searchParams.jobId },
+        select: {
+          id: true,
+          customerName: true,
+          customerPhone: true,
+          customerEmail: true,
+          address: true,
+          serviceType: true,
+          scheduledDate: true,
+          status: true,
+          assignedWorkerId: true,
+          createdAt: true,
+          updatedAt: true,
+          customerPrice: true,
+          cleanerPay: true,
+          platformFee: true,
+        },
+      })
     : null;
 
   return (
