@@ -1,25 +1,21 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 
-const SEND_INTERVAL_MS = 10_000;
+const SEND_INTERVAL_MS = 12_000;
 
-export function WorkerLocationTracker() {
-  const [status, setStatus] = useState<'idle' | 'tracking' | 'error'>('idle');
-  const [message, setMessage] = useState('');
-
+export default function WorkerLocationTracker() {
   const watchIdRef = useRef<number | null>(null);
   const timerRef = useRef<number | null>(null);
   const latestPositionRef = useRef<{ latitude: number; longitude: number } | null>(null);
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setStatus('error');
-      setMessage('Geolocation is not supported on this device.');
+      console.error('Geolocation is not supported on this device.');
       return;
     }
 
-    const sendLocation = async () => {
+    const postLocation = async () => {
       if (!latestPositionRef.current) return;
 
       try {
@@ -28,9 +24,8 @@ export function WorkerLocationTracker() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(latestPositionRef.current),
         });
-      } catch {
-        setStatus('error');
-        setMessage('Unable to send location update.');
+      } catch (error) {
+        console.error('Failed to send worker location:', error);
       }
     };
 
@@ -40,46 +35,36 @@ export function WorkerLocationTracker() {
           latitude: position.coords.latitude,
           longitude: position.coords.longitude,
         };
-        setStatus('tracking');
-        setMessage('Location sharing active.');
       },
       (error) => {
-        setStatus('error');
         if (error.code === error.PERMISSION_DENIED) {
-          setMessage('Location permission denied. Enable GPS access to share live tracking.');
-        } else {
-          setMessage('Unable to read GPS location.');
+          console.error('Location permission denied');
+          return;
         }
+
+        console.error('Failed to read location:', error);
       },
       {
         enableHighAccuracy: true,
-        timeout: 15000,
-        maximumAge: 5000,
+        maximumAge: 10_000,
+        timeout: 10_000,
       },
     );
 
     timerRef.current = window.setInterval(() => {
-      void sendLocation();
+      void postLocation();
     }, SEND_INTERVAL_MS);
-
-    void sendLocation();
 
     return () => {
       if (watchIdRef.current !== null) {
         navigator.geolocation.clearWatch(watchIdRef.current);
       }
+
       if (timerRef.current !== null) {
         window.clearInterval(timerRef.current);
       }
     };
   }, []);
 
-  return (
-    <div className="rounded-lg border border-slate-700/80 bg-slate-900/70 px-3 py-2 text-xs text-slate-300">
-      <span className="font-semibold text-sky-300">GPS Tracker:</span>{' '}
-      <span className={status === 'error' ? 'text-rose-300' : 'text-slate-200'}>
-        {message || 'Waiting for location...'}
-      </span>
-    </div>
-  );
+  return null;
 }

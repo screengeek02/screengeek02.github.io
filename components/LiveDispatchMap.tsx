@@ -40,9 +40,16 @@ const PUNTA_CANA_CENTER: [number, number] = [-68.3725, 18.5601];
 const ROUTE_SOURCE_ID = 'dispatch-route-source';
 const ROUTE_LAYER_ID = 'dispatch-route';
 
+function workerStatusClass(status: DispatchWorker['status']) {
+  if (status === 'AVAILABLE') return 'is-available';
+  if (status === 'ASSIGNED') return 'is-assigned';
+  if (status === 'TRAVELING') return 'is-traveling';
+  return 'is-offline';
+}
+
 function createWorkerMarkerElement(worker: DispatchWorker) {
   const el = document.createElement('div');
-  el.className = `helio-map-marker helio-map-marker-worker${worker.status === 'AVAILABLE' ? ' is-active' : ''}`;
+  el.className = `helio-map-marker helio-map-marker-worker ${workerStatusClass(worker.status)}`;
   el.setAttribute('title', `${worker.name} (${worker.status})`);
 
   const core = document.createElement('span');
@@ -229,7 +236,7 @@ export function LiveDispatchMap() {
 
         if (existing) {
           existing.setLngLat(lngLat);
-          existing.getElement().className = `helio-map-marker helio-map-marker-worker${worker.status === 'AVAILABLE' ? ' is-active' : ''}`;
+          existing.getElement().className = `helio-map-marker helio-map-marker-worker ${workerStatusClass(worker.status)}`;
           existing.getElement().setAttribute('title', `${worker.name} (${worker.status})`);
           return;
         }
@@ -247,6 +254,15 @@ export function LiveDispatchMap() {
 
         const marker = new mapbox.Marker({ element: createJobMarkerElement(job) })
           .setLngLat([job.longitude, job.latitude])
+          .setPopup(
+            new mapbox.Popup({ offset: 16 }).setHTML(`
+              <div style="color:#cbd5e1;font-size:12px;line-height:1.4;">
+                <div style="font-weight:700;color:#f8fafc;margin-bottom:4px;">${job.customerName}</div>
+                <div>${job.address}</div>
+                <div style="margin-top:4px;color:#7dd3fc;">Worker: ${job.assignedWorkerName ?? 'Unassigned'}</div>
+              </div>
+            `),
+          )
           .addTo(map);
 
         marker.getElement().addEventListener('click', () => {

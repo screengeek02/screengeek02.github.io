@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { AvailabilityToggle } from '@/components/availability-toggle';
 import { AvatarSpot } from '@/components/avatar-spot';
-import { WorkerLocationTracker } from '@/components/WorkerLocationTracker';
 import { StatusBadge } from '@/components/status-badge';
 
 type Job = {
@@ -71,7 +70,6 @@ export default function WorkerDashboard() {
         </div>
       </div>
 
-      <WorkerLocationTracker />
 
       <div className="grid gap-3 md:grid-cols-3">
         <article className="rounded-xl border border-slate-700/70 bg-slate-900/70 p-4">

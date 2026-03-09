@@ -1,4 +1,4 @@
-import { JobStatus, Role } from '@prisma/client';
+import { JobStatus, Role, WorkerStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -6,6 +6,7 @@ import type { DispatchJob, DispatchWorker } from '@/lib/dispatch';
 
 const BASE_LAT = 18.5601;
 const BASE_LNG = -68.3725;
+const OFFLINE_THRESHOLD_MS = 60_000;
 
 function hashToInt(value: string) {
   let hash = 0;
@@ -35,8 +36,14 @@ export async function GET() {
 
   const [workers, jobs] = await Promise.all([
     db.user.findMany({
-      where: { role: Role.WORKER },
-      select: { id: true, name: true },
+      where: { role: Role.WORKER, workerStatus: WorkerStatus.APPROVED },
+      select: {
+        id: true,
+        name: true,
+        lastLatitude: true,
+        lastLongitude: true,
+        lastUpdated: true,
+      },
       orderBy: { name: 'asc' },
     }),
     db.job.findMany({
@@ -53,29 +60,50 @@ export async function GET() {
         scheduledDate: true,
         status: true,
         assignedWorkerId: true,
+        assignedWorker: {
+          select: {
+            name: true,
+          },
+        },
       },
       orderBy: { scheduledDate: 'asc' },
       take: 50,
     }),
   ]);
 
-  const activeAssignments = new Map<string, number>();
+  const assignedJobs = new Map<string, number>();
+  const inProgressJobs = new Map<string, number>();
+
   jobs.forEach((job) => {
     if (!job.assignedWorkerId) return;
-    activeAssignments.set(job.assignedWorkerId, (activeAssignments.get(job.assignedWorkerId) ?? 0) + 1);
+
+    if (job.status === JobStatus.ASSIGNED) {
+      assignedJobs.set(job.assignedWorkerId, (assignedJobs.get(job.assignedWorkerId) ?? 0) + 1);
+    }
+
+    if (job.status === JobStatus.IN_PROGRESS) {
+      inProgressJobs.set(job.assignedWorkerId, (inProgressJobs.get(job.assignedWorkerId) ?? 0) + 1);
+    }
   });
 
+  const now = Date.now();
+
   const workerPayload: DispatchWorker[] = workers.map((worker) => {
-    const assignedJobsCount = activeAssignments.get(worker.id) ?? 0;
+    const assignedCount = assignedJobs.get(worker.id) ?? 0;
+    const inProgressCount = inProgressJobs.get(worker.id) ?? 0;
+    const lastUpdatedMs = worker.lastUpdated ? new Date(worker.lastUpdated).getTime() : 0;
+    const isOffline = !lastUpdatedMs || now - lastUpdatedMs > OFFLINE_THRESHOLD_MS;
+
+    const status = isOffline ? 'OFFLINE' : assignedCount > 0 ? 'TRAVELING' : inProgressCount > 0 ? 'ASSIGNED' : 'AVAILABLE';
 
     return {
       id: worker.id,
       name: worker.name,
-      lastLatitude: null,
-      lastLongitude: null,
-      lastUpdated: null,
-      status: assignedJobsCount > 0 ? 'BUSY' : 'AVAILABLE',
-      assignedJobsCount,
+      lastLatitude: worker.lastLatitude,
+      lastLongitude: worker.lastLongitude,
+      lastUpdated: worker.lastUpdated ? worker.lastUpdated.toISOString() : null,
+      status,
+      assignedJobsCount: assignedCount + inProgressCount,
     };
   });
 
@@ -91,6 +119,7 @@ export async function GET() {
       address: job.address,
       customerName: job.customerName,
       assignedWorkerId: job.assignedWorkerId,
+      assignedWorkerName: job.assignedWorker?.name ?? null,
     };
   });
 

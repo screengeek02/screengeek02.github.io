@@ -1,4 +1,4 @@
-export type DispatchWorkerState = 'AVAILABLE' | 'BUSY';
+export type DispatchWorkerState = 'AVAILABLE' | 'ASSIGNED' | 'TRAVELING' | 'OFFLINE';
 
 export type DispatchWorker = {
   id: string;
@@ -22,6 +22,7 @@ export type DispatchJob = {
   address: string;
   customerName: string;
   assignedWorkerId: string | null;
+  assignedWorkerName?: string | null;
 };
 
 export type DispatchSuggestion = {
