@@ -39,7 +39,7 @@ export function SplashScreen({ onComplete, durationMs = 1800 }: SplashScreenProp
       <div className="relative z-10 flex min-h-screen flex-col items-center justify-center text-center text-white">
         <Link href="/" className="inline-flex">
           <Image
-            src="/public/image/logo.png"
+            src="/image/logo.png"
             alt="Helio Cleaning"
             width={220}
             height={120}

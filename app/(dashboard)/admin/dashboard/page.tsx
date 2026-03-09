@@ -31,16 +31,38 @@ export default function AdminDashboard() {
   const [status, setStatus] = useState('ALL');
   const [date, setDate] = useState('');
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
   const loadData = useCallback(async () => {
     setLoading(true);
-    const [jobsRes, workerRes] = await Promise.all([
-      fetch(`/api/admin/jobs?status=${status}&date=${date}`),
-      fetch('/api/admin/workers'),
-    ]);
-    setJobs(await jobsRes.json());
-    setWorkers(await workerRes.json());
-    setLoading(false);
+    setError('');
+
+    try {
+      const [jobsRes, workerRes] = await Promise.all([
+        fetch(`/api/admin/jobs?status=${status}&date=${date}`, { cache: 'no-store' }),
+        fetch('/api/admin/workers', { cache: 'no-store' }),
+      ]);
+
+      const jobsJson = (await jobsRes.json()) as unknown;
+      const workersJson = (await workerRes.json()) as unknown;
+
+      if (!jobsRes.ok || !Array.isArray(jobsJson)) {
+        throw new Error('Unable to load jobs.');
+      }
+
+      if (!workerRes.ok || !Array.isArray(workersJson)) {
+        throw new Error('Unable to load workers.');
+      }
+
+      setJobs(jobsJson as Job[]);
+      setWorkers(workersJson as Worker[]);
+    } catch {
+      setJobs([]);
+      setWorkers([]);
+      setError('Could not load dashboard data. Please refresh and try again.');
+    } finally {
+      setLoading(false);
+    }
   }, [status, date]);
 
   useEffect(() => {
@@ -137,6 +159,8 @@ export default function AdminDashboard() {
           <option value="past">Past</option>
         </select>
       </div>
+
+      {error && <p className="rounded-xl border border-rose-500/40 bg-rose-950/30 px-4 py-3 text-sm text-rose-300">{error}</p>}
 
       <div className="grid gap-3 md:grid-cols-3">
         <DashboardKpiCard label="Jobs Today" value={stats.jobsToday} hint="15% vs yesterday" icon="🗂" tone="sky" />

@@ -20,12 +20,27 @@ export default function WorkerDashboard() {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [online, setOnline] = useState(true);
+  const [error, setError] = useState('');
 
   const loadJobs = useCallback(async () => {
     setLoading(true);
-    const response = await fetch('/api/worker/jobs');
-    setJobs(await response.json());
-    setLoading(false);
+    setError('');
+
+    try {
+      const response = await fetch('/api/worker/jobs', { cache: 'no-store' });
+      const json = (await response.json()) as unknown;
+
+      if (!response.ok || !Array.isArray(json)) {
+        throw new Error('Unable to load jobs.');
+      }
+
+      setJobs(json as Job[]);
+    } catch {
+      setJobs([]);
+      setError('Could not load jobs right now. Please refresh and try again.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
 
   useEffect(() => {
@@ -87,6 +102,7 @@ export default function WorkerDashboard() {
       </div>
 
       {loading && <p className="text-slate-400">Loading jobs...</p>}
+      {error && <p className="rounded-xl border border-rose-500/40 bg-rose-950/30 px-4 py-3 text-sm text-rose-300">{error}</p>}
 
       {!loading && currentJob && (
         <article className="rounded-2xl border border-sky-400/25 bg-slate-900/75 p-5 shadow-[0_0_24px_rgba(56,189,248,0.14)]">
