@@ -36,7 +36,25 @@ export async function GET(request: NextRequest) {
 
     const jobs = await db.job.findMany({
       where,
-      include: { assignedWorker: { select: { id: true, name: true } } },
+      select: {
+        id: true,
+        customerName: true,
+        customerPhone: true,
+        customerEmail: true,
+        address: true,
+        serviceType: true,
+        scheduledDate: true,
+        status: true,
+        assignedWorkerId: true,
+        createdAt: true,
+        updatedAt: true,
+        assignedWorker: {
+          select: {
+            id: true,
+            name: true,
+          },
+        },
+      },
       orderBy: { scheduledDate: 'asc' },
     });
 

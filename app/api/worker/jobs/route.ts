@@ -9,23 +9,28 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const jobs = await db.job.findMany({
-    where: { assignedWorkerId: session.userId },
-    select: {
-      id: true,
-      customerName: true,
-      customerPhone: true,
-      address: true,
-      serviceType: true,
-      scheduledDate: true,
-      status: true,
-      cleanerPay: true,
-      assignedWorkerId: true,
-      createdAt: true,
-      updatedAt: true,
-    },
-    orderBy: { scheduledDate: 'asc' },
-  });
+  try {
+    const jobs = await db.job.findMany({
+      where: { assignedWorkerId: session.userId },
+      select: {
+        id: true,
+        customerName: true,
+        customerPhone: true,
+        address: true,
+        serviceType: true,
+        scheduledDate: true,
+        status: true,
+        assignedWorkerId: true,
+        createdAt: true,
+        updatedAt: true,
+      },
+      orderBy: { scheduledDate: 'asc' },
+    });
 
-  return NextResponse.json(jobs);
+    return NextResponse.json(jobs);
+  } catch (error) {
+    console.error('Worker jobs fetch failed:', error);
+    return NextResponse.json({ error: 'Unable to load worker jobs.' }, { status: 500 });
+  }
 }
+
