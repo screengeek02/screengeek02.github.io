@@ -1,5 +1,4 @@
-import NextAuth from "next-auth"
-import { DefaultSession } from "next-auth"
+import NextAuth, { DefaultSession } from "next-auth"
 
 export type UserRole =
   | "RESEARCHER"
@@ -8,6 +7,7 @@ export type UserRole =
   | "SUPER_ADMIN"
 
 declare module "next-auth" {
+
   interface Session {
     user: {
       id: string
@@ -16,15 +16,18 @@ declare module "next-auth" {
   }
 
   interface User {
+    id: string
     role: UserRole
   }
 }
 
 declare module "next-auth/jwt" {
+
   interface JWT {
     id: string
     role: UserRole
     email?: string
     name?: string
   }
+
 }

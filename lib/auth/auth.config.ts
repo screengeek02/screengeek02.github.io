@@ -39,15 +39,10 @@ export const authConfig = {
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-
-        session.user.role = (token.role ?? 'RESEARCHER') as
-          | 'RESEARCHER'
-          | 'INSTITUTION_ADMIN'
-          | 'COUNTRY_COORDINATOR'
-          | 'SUPER_ADMIN';
+        session.user.id = token.id;
+        session.user.email = token.email;
+        session.user.name = token.name;
+        session.user.role = token.role;
       }
 
       return session;
