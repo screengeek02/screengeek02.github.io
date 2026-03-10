@@ -38,11 +38,19 @@ export const authConfig = {
       return token;
     },
     async session({ session, token }) {
+      const typedToken = token as {
+        id?: string;
+        role?: 'RESEARCHER' | 'INSTITUTION_ADMIN' | 'COUNTRY_COORDINATOR' | 'SUPER_ADMIN';
+        email?: string;
+        name?: string;
+      };
+
       if (session.user) {
-        session.user.id = token.id;
-        session.user.email = token.email;
-        session.user.name = token.name;
-        session.user.role = token.role;
+        session.user.id = typedToken.id ?? '';
+        session.user.email = typedToken.email ?? '';
+        session.user.name = typedToken.name ?? '';
+
+        session.user.role = typedToken.role ?? 'RESEARCHER';
       }
 
       return session;
