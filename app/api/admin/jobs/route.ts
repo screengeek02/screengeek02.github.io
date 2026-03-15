@@ -58,9 +58,9 @@ export async function GET(request: NextRequest) {
       orderBy: { scheduledDate: 'asc' },
     });
 
-    return NextResponse.json(jobs);
+    return NextResponse.json(jobs ?? []);
   } catch (error) {
     console.error('Admin jobs fetch failed:', error);
-    return NextResponse.json({ error: 'Unable to load jobs.' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }

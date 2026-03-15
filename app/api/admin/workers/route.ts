@@ -1,4 +1,4 @@
-import { Role } from '@prisma/client';
+import { Role, WorkerStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { getSessionFromCookie } from '@/lib/auth';
 import { db } from '@/lib/db';
@@ -13,6 +13,7 @@ export async function GET() {
     const workers = await db.user.findMany({
       where: {
         role: Role.WORKER,
+        workerStatus: WorkerStatus.APPROVED,
       },
       select: {
         id: true,
@@ -23,9 +24,9 @@ export async function GET() {
       orderBy: { createdAt: 'desc' },
     });
 
-    return NextResponse.json(workers);
+    return NextResponse.json(workers ?? []);
   } catch (error) {
     console.error('Admin workers fetch failed:', error);
-    return NextResponse.json({ error: 'Unable to load workers.' }, { status: 500 });
+    return NextResponse.json([]);
   }
 }

@@ -124,9 +124,9 @@ export async function GET() {
       };
     });
 
-    return NextResponse.json({ workers: workerPayload, jobs: jobPayload });
+    return NextResponse.json({ workers: workerPayload ?? [], jobs: jobPayload ?? [] });
   } catch (error) {
     console.error('Live dispatch fetch failed:', error);
-    return NextResponse.json({ error: 'Unable to load live dispatch data.' }, { status: 500 });
+    return NextResponse.json({ workers: [], jobs: [] });
   }
 }
