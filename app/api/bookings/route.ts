@@ -2,6 +2,7 @@ import { JobStatus } from '@prisma/client';
 import { NextResponse } from 'next/server';
 import { calculateCommission } from '@/lib/commission';
 import { db } from '@/lib/db';
+import { autoAssignWorker } from '@/lib/dispatchEngine';
 import { getBasePriceForService } from '@/lib/pricing';
 import { bookingSchema } from '@/lib/validations';
 
@@ -57,6 +58,10 @@ export async function POST(request: Request) {
           : undefined,
       },
     });
+
+    const latitude = typeof json.latitude === 'number' ? json.latitude : null;
+    const longitude = typeof json.longitude === 'number' ? json.longitude : null;
+    await autoAssignWorker(job.id, latitude, longitude);
 
     return NextResponse.json({
       success: true,
