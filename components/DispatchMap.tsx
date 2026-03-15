@@ -75,6 +75,8 @@ export function DispatchMap({ workers, jobs, selectedJobId, onSelectJob }: Props
 
   useEffect(() => {
     let active = true;
+    const workerMarkers = workerMarkersRef.current;
+    const jobMarkers = jobMarkersRef.current;
 
     async function initMap() {
       if (!containerRef.current || mapRef.current || !token) return;
@@ -101,10 +103,10 @@ export function DispatchMap({ workers, jobs, selectedJobId, onSelectJob }: Props
 
     return () => {
       active = false;
-      workerMarkersRef.current.forEach((marker) => marker.remove());
-      jobMarkersRef.current.forEach((marker) => marker.remove());
-      workerMarkersRef.current.clear();
-      jobMarkersRef.current.clear();
+      workerMarkers.forEach((marker) => marker.remove());
+      jobMarkers.forEach((marker) => marker.remove());
+      workerMarkers.clear();
+      jobMarkers.clear();
       mapRef.current?.remove();
       mapRef.current = null;
     };

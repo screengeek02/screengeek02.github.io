@@ -1,6 +1,7 @@
 'use client';
 
 import { JobStatus } from '@prisma/client';
+import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DashboardKpiCard } from '@/components/dashboard-kpi-card';
 import { AvatarSpot } from '@/components/avatar-spot';
@@ -26,6 +27,7 @@ const activityItems = [
 ];
 
 export default function AdminDashboard() {
+  const router = useRouter();
   const [jobs, setJobs] = useState<Job[]>([]);
   const [workers, setWorkers] = useState<Worker[]>([]);
   const [status, setStatus] = useState('ALL');
@@ -45,6 +47,9 @@ export default function AdminDashboard() {
 
       const jobsJson = (await jobsRes.json()) as unknown;
       const workersJson = (await workerRes.json()) as unknown;
+
+      console.log('Dashboard jobs:', jobsJson);
+      console.log('Workers:', workersJson);
 
       if (!jobsRes.ok || !Array.isArray(jobsJson)) {
         throw new Error('Unable to load jobs.');
@@ -71,11 +76,18 @@ export default function AdminDashboard() {
 
   const changeStatus = useCallback(
     async (jobId: string, nextStatus: JobStatus) => {
-      await fetch(`/api/admin/jobs/${jobId}/status`, {
+      const response = await fetch(`/api/admin/jobs/${jobId}/status`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: nextStatus }),
       });
+
+      if (!response.ok) {
+        const json = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(json?.error ?? 'Unable to update job status.');
+        return;
+      }
+
       void loadData();
     },
     [loadData],
@@ -83,11 +95,18 @@ export default function AdminDashboard() {
 
   const assign = useCallback(
     async (jobId: string, workerId: string) => {
-      await fetch(`/api/admin/jobs/${jobId}/assign`, {
+      const response = await fetch(`/api/admin/jobs/${jobId}/assign`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ workerId }),
       });
+
+      if (!response.ok) {
+        const json = (await response.json().catch(() => null)) as { error?: string } | null;
+        setError(json?.error ?? 'Unable to assign worker.');
+        return;
+      }
+
       void loadData();
     },
     [loadData],
@@ -256,6 +275,7 @@ export default function AdminDashboard() {
                   </span>
                   <button
                     type="button"
+                    onClick={() => router.push('/admin/workers')}
                     className="rounded-lg border border-slate-600 px-2.5 py-1 text-xs font-medium text-slate-200 transition hover:border-sky-400/40 hover:text-sky-200"
                   >
                     Manage

@@ -34,94 +34,99 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const [workers, jobs] = await Promise.all([
-    db.user.findMany({
-      where: { role: Role.WORKER, workerStatus: WorkerStatus.APPROVED },
-      select: {
-        id: true,
-        name: true,
-        lastLatitude: true,
-        lastLongitude: true,
-        lastUpdated: true,
-      },
-      orderBy: { name: 'asc' },
-    }),
-    db.job.findMany({
-      where: {
-        status: {
-          in: [JobStatus.PENDING, JobStatus.ASSIGNED, JobStatus.IN_PROGRESS],
+  try {
+    const [workers, jobs] = await Promise.all([
+      db.user.findMany({
+        where: { role: Role.WORKER, workerStatus: WorkerStatus.APPROVED },
+        select: {
+          id: true,
+          name: true,
+          lastLatitude: true,
+          lastLongitude: true,
+          lastUpdated: true,
         },
-      },
-      select: {
-        id: true,
-        address: true,
-        customerName: true,
-        serviceType: true,
-        scheduledDate: true,
-        status: true,
-        assignedWorkerId: true,
-        assignedWorker: {
-          select: {
-            name: true,
+        orderBy: { name: 'asc' },
+      }),
+      db.job.findMany({
+        where: {
+          status: {
+            in: [JobStatus.PENDING, JobStatus.ASSIGNED, JobStatus.IN_PROGRESS],
           },
         },
-      },
-      orderBy: { scheduledDate: 'asc' },
-      take: 50,
-    }),
-  ]);
+        select: {
+          id: true,
+          address: true,
+          customerName: true,
+          serviceType: true,
+          scheduledDate: true,
+          status: true,
+          assignedWorkerId: true,
+          assignedWorker: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        orderBy: { scheduledDate: 'asc' },
+        take: 50,
+      }),
+    ]);
 
-  const assignedJobs = new Map<string, number>();
-  const inProgressJobs = new Map<string, number>();
+    const assignedJobs = new Map<string, number>();
+    const inProgressJobs = new Map<string, number>();
 
-  jobs.forEach((job) => {
-    if (!job.assignedWorkerId) return;
+    jobs.forEach((job) => {
+      if (!job.assignedWorkerId) return;
 
-    if (job.status === JobStatus.ASSIGNED) {
-      assignedJobs.set(job.assignedWorkerId, (assignedJobs.get(job.assignedWorkerId) ?? 0) + 1);
-    }
+      if (job.status === JobStatus.ASSIGNED) {
+        assignedJobs.set(job.assignedWorkerId, (assignedJobs.get(job.assignedWorkerId) ?? 0) + 1);
+      }
 
-    if (job.status === JobStatus.IN_PROGRESS) {
-      inProgressJobs.set(job.assignedWorkerId, (inProgressJobs.get(job.assignedWorkerId) ?? 0) + 1);
-    }
-  });
+      if (job.status === JobStatus.IN_PROGRESS) {
+        inProgressJobs.set(job.assignedWorkerId, (inProgressJobs.get(job.assignedWorkerId) ?? 0) + 1);
+      }
+    });
 
-  const now = Date.now();
+    const now = Date.now();
 
-  const workerPayload: DispatchWorker[] = workers.map((worker) => {
-    const assignedCount = assignedJobs.get(worker.id) ?? 0;
-    const inProgressCount = inProgressJobs.get(worker.id) ?? 0;
-    const lastUpdatedMs = worker.lastUpdated ? new Date(worker.lastUpdated).getTime() : 0;
-    const isOffline = !lastUpdatedMs || now - lastUpdatedMs > OFFLINE_THRESHOLD_MS;
+    const workerPayload: DispatchWorker[] = workers.map((worker) => {
+      const assignedCount = assignedJobs.get(worker.id) ?? 0;
+      const inProgressCount = inProgressJobs.get(worker.id) ?? 0;
+      const lastUpdatedMs = worker.lastUpdated ? new Date(worker.lastUpdated).getTime() : 0;
+      const isOffline = !lastUpdatedMs || now - lastUpdatedMs > OFFLINE_THRESHOLD_MS;
 
-    const status = isOffline ? 'OFFLINE' : assignedCount > 0 ? 'TRAVELING' : inProgressCount > 0 ? 'ASSIGNED' : 'AVAILABLE';
+      const status = isOffline ? 'OFFLINE' : assignedCount > 0 ? 'TRAVELING' : inProgressCount > 0 ? 'ASSIGNED' : 'AVAILABLE';
 
-    return {
-      id: worker.id,
-      name: worker.name,
-      lastLatitude: worker.lastLatitude,
-      lastLongitude: worker.lastLongitude,
-      lastUpdated: worker.lastUpdated ? worker.lastUpdated.toISOString() : null,
-      status,
-      assignedJobsCount: assignedCount + inProgressCount,
-    };
-  });
+      return {
+        id: worker.id,
+        name: worker.name,
+        lastLatitude: worker.lastLatitude,
+        lastLongitude: worker.lastLongitude,
+        lastUpdated: worker.lastUpdated ? worker.lastUpdated.toISOString() : null,
+        status,
+        assignedJobsCount: assignedCount + inProgressCount,
+      };
+    });
 
-  const jobPayload: DispatchJob[] = jobs.map((job) => {
-    const coord = generateCoordinate(`${job.id}-${job.address}`);
-    return {
-      id: job.id,
-      latitude: coord.latitude,
-      longitude: coord.longitude,
-      status: job.status,
-      serviceType: job.serviceType,
-      scheduledDate: job.scheduledDate.toISOString(),
-      address: job.address,
-      customerName: job.customerName,
-      assignedWorkerId: job.assignedWorkerId,
-      assignedWorkerName: job.assignedWorker?.name ?? null,
-    };
-  });
+    const jobPayload: DispatchJob[] = jobs.map((job) => {
+      const coord = generateCoordinate(`${job.id}-${job.address}`);
+      return {
+        id: job.id,
+        latitude: coord.latitude,
+        longitude: coord.longitude,
+        status: job.status,
+        serviceType: job.serviceType,
+        scheduledDate: job.scheduledDate.toISOString(),
+        address: job.address,
+        customerName: job.customerName,
+        assignedWorkerId: job.assignedWorkerId,
+        assignedWorkerName: job.assignedWorker?.name ?? null,
+      };
+    });
 
-  return NextResponse.json({ workers: workerPayload, jobs: jobPayload });
+    return NextResponse.json({ workers: workerPayload, jobs: jobPayload });
+  } catch (error) {
+    console.error('Live dispatch fetch failed:', error);
+    return NextResponse.json({ error: 'Unable to load live dispatch data.' }, { status: 500 });
+  }
 }

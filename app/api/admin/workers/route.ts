@@ -9,18 +9,23 @@ export async function GET() {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const workers = await db.user.findMany({
-    where: {
-      role: Role.WORKER,
-    },
-    select: {
-      id: true,
-      name: true,
-      email: true,
-      role: true,
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+  try {
+    const workers = await db.user.findMany({
+      where: {
+        role: Role.WORKER,
+      },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        role: true,
+      },
+      orderBy: { createdAt: 'desc' },
+    });
 
-  return NextResponse.json(workers);
+    return NextResponse.json(workers);
+  } catch (error) {
+    console.error('Admin workers fetch failed:', error);
+    return NextResponse.json({ error: 'Unable to load workers.' }, { status: 500 });
+  }
 }

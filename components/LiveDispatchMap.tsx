@@ -294,7 +294,11 @@ export function LiveDispatchMap() {
         throw new Error('Unable to load live dispatch data.');
       }
 
-      const payload = (await response.json()) as LiveDispatchResponse;
+      const payload = (await response.json()) as Partial<LiveDispatchResponse>;
+      if (!Array.isArray(payload.workers) || !Array.isArray(payload.jobs)) {
+        throw new Error('Invalid live dispatch payload.');
+      }
+
       setWorkers(payload.workers);
       setJobs(payload.jobs);
       syncMarkers(payload.workers, payload.jobs);
@@ -330,6 +334,8 @@ export function LiveDispatchMap() {
 
   useEffect(() => {
     let mounted = true;
+    const workerMarkers = workerMarkersRef.current;
+    const jobMarkers = jobMarkersRef.current;
 
     async function initialize() {
       if (!mounted || mapRef.current || !containerRef.current) return;
@@ -412,10 +418,10 @@ export function LiveDispatchMap() {
       popupRef.current?.remove();
       popupRef.current = null;
 
-      workerMarkersRef.current.forEach((marker) => marker.remove());
-      workerMarkersRef.current.clear();
-      jobMarkersRef.current.forEach((marker) => marker.remove());
-      jobMarkersRef.current.clear();
+      workerMarkers.forEach((marker) => marker.remove());
+      workerMarkers.clear();
+      jobMarkers.forEach((marker) => marker.remove());
+      jobMarkers.clear();
 
       mapRef.current?.remove();
       mapRef.current = null;
